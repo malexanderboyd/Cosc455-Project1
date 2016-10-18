@@ -5,7 +5,7 @@ package edu.towson.cosc.mboyd.project1
   */
 trait LexicalAnalyzerTraits {
   def addChar() : Unit
-  def getChar() : Char
+  def getChar() : Unit
   def getNextToken() : Unit
   def lookup(candidateToken : String) : Boolean
 }

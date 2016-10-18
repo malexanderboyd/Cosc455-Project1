@@ -19,4 +19,5 @@ trait SyntaxAnalyzerTraits {
   def link() : Unit
   def image() : Unit
   def newline() : Unit
+  def EOL() : Unit
 }

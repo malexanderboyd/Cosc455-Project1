@@ -13,16 +13,14 @@ object Compiler {
 
   def main(args: Array[String]) = {
     // make sure input follows usage rules
-    checkInput(args(0))
-
-    args(0)
-    ReadandCompile(args(0))
+    checkInput(args)
+    Compile(args(0))
     // for each line read from file, scan and parse
 
 
     }
 
-  def ReadandCompile(fileName : String) : Unit = {
+  def Compile(fileName : String) : Unit = {
   for (line <- Source.fromFile(fileName).getLines()) {
   // get the first Token
   println ("Current Line being Analyzed: " + line)
@@ -37,12 +35,12 @@ object Compiler {
 }
   }
 
-  def checkInput(inputFile: String) : Unit = {
+  def checkInput(inputFile: Array[String]) : Unit = {
       if(inputFile.length != 1) {
         println("Usage Error: Wrong number of input arguments.")
         System.exit(0)
       }
-      else if(!inputFile.endsWith(".mkd"))
+      else if(!inputFile(0).endsWith(".mkd"))
       {
         println("Usage Error: Input file should be \".mkd\" extension.")
         System.exit(0)

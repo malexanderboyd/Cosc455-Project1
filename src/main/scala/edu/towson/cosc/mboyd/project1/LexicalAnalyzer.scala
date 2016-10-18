@@ -3,12 +3,13 @@ package edu.towson.cosc.mboyd.project1
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.ArrayBuffer
 
+
 class LexicalAnalyzer extends LexicalAnalyzerTraits {
 
   var sourceLine : String = ""
   var lexemes  = new ListBuffer[String]
   var lexeme  = new  ArrayBuffer[Char](100)
-  var nextChar : Char = '''
+  var nextChar : Char = ' '
   var lexLength : Int = 0
   var position : Int = 0
   def start(line: String) : Unit = {
@@ -19,24 +20,7 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     getNextToken()
   }
   def initializeLexems() : Unit = {
-    lexemes += "\n"
-    lexemes += "\\BEGIN"
-    lexemes += "\\END"
-    lexemes += "\\TITLE"
-    lexemes += "#"
-    lexemes += "\\PARB"
-    lexemes += "\\PARE"
-    lexemes += "**"
-    lexemes += "*"
-    lexemes += "+"
-    lexemes += "\\\\"
-    lexemes += "["
-    lexemes += "]"
-    lexemes += "("
-    lexemes += ")"
-    lexemes += "!"
-    lexemes += "\\DEF"
-    lexemes += "\\USE"
+      lexemes = CONSTANTS.validLexemes
   }
   def getChar() : Unit = {
     if(position < sourceLine.length()) {
@@ -47,20 +31,21 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     else
       nextChar = '\n'
   }
+
   def getNextToken() : Unit = {
     lexLength = 0
     getNonBlank()
     addChar()
     getChar()
     // Continue gathering characters for token
-    while(nextChar != '\n' && nextChar != ' ') {
+    while( nextChar != CONSTANTS.EOL ) {
       addChar()
       getChar()
     }
-    println("Lexeme: " + lexeme.mkString)
     val newToken : String = lexeme.mkString
-    println("New Token Value: " + newToken)
-    if(lookup(newToken.substring(0, lexLength))) {
+    println("newtoken lookup: " + newToken.substring(0, lexLength))
+    if(lookup(newToken.substring(0, lexLength)))
+    {
       Compiler.currentToken_$eq(newToken.substring(0, lexLength))
       lexeme.clear()
     }
@@ -70,7 +55,7 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     if(!lexemes.contains(candidateToken)) {
       Compiler.Parser.setError()
       println("Line " + Compiler.lineCount + ": LEXICAL ERROR -" + candidateToken + " is not recognized.")
-      return false
+      return true
     }
     return true
   }
@@ -78,8 +63,17 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     return c == ' '
   }
   def getNonBlank() : Unit = {
-    while(isSpace(nextChar)) {
+    while(isSpace(nextChar) && nextChar != '\n') {
       getChar()
+    }
+  }
+
+  def isLexeme(nextChar : Char) : Boolean = {
+    nextChar match {
+      case '[' => return true
+      case ']' => return true
+      case '!' => return true
+      case _ => return false
     }
   }
   def addChar() : Unit = {
@@ -90,9 +84,8 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
       println(lexeme)
     }
     else {
-      println("Error - lexLength ... addChar() ")
       if(!isSpace(nextChar)) {
-        while(!isSpace(nextChar)) {
+        while(!isSpace(nextChar) && !isLexeme(nextChar)) {
           getChar()
         }
         lexLength = 0
