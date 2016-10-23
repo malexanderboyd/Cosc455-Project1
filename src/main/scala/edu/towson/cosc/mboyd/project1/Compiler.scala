@@ -56,7 +56,7 @@ object Compiler {
           println("===== Has Optional Variable:  " + hasOptVar + " ====")
         checkForSyntaxErrors()
       }
-      if (!hasTitle && hasDocBegin && numPasses == 1) {
+      if ( (!hasTitle && hasDocBegin && !hasOptVar && numPasses == 1) || (!hasTitle && numPasses == 2 && hasDocBegin) ) {
         if (debugMode)
           println("===== Checking for Title ====")
         hasTitle = Parser.Title()
@@ -64,7 +64,7 @@ object Compiler {
           println("===== Has Title:  " + hasTitle + " ====")
         checkForSyntaxErrors()
       }
-      if (!hasBody && hasTitle && numPasses > 1) {
+      if (!hasBody && hasTitle && numPasses > 2) {
         if (debugMode)
         println("===== Checking for Body Content ====")
         hasBody = Parser.body()
@@ -72,17 +72,17 @@ object Compiler {
         println("===== Has body content: " + hasBody + " ====")
         checkForSyntaxErrors()
       }
-      if (!hasDocEnd && hasBody) {
-        if (debugMode)
-        println("===== Checking for Gittex End ====")
-        hasDocEnd = Parser.gittexEnd()
-        if (debugMode)
-        println("===== Has Gittex End:  " + hasDocEnd + " ====")
-        checkForSyntaxErrors()
-      }
-
       numPasses += 1
     } // end of line input loop
+
+    if (!hasDocEnd && hasBody) {
+      if (debugMode)
+        println("===== Checking for Gittex End ====")
+      hasDocEnd = Parser.gittexEnd()
+      if (debugMode)
+        println("===== Has Gittex End:  " + hasDocEnd + " ====")
+      checkForSyntaxErrors()
+    }
 
     Semantics.convert()
 

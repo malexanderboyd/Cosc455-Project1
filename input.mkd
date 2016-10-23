@@ -1,3 +1,4 @@
 \BEGIN
+\DEF[Tacos = TacoSalad]
 \TITLE[Hello It's me]
 \END

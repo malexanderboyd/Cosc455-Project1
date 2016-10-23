@@ -57,7 +57,7 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     if (lexemes.contains(candidateToken)) {
       return true
     }
-    else if (candidateToken.endsWith(CONSTANTS.BRACKETE)) {
+    else if (candidateToken.endsWith(CONSTANTS.BRACKETE) || candidateToken.endsWith(CONSTANTS.EQSIGN)) {
       if (Compiler.debugMode)
         println("EndsW/Brackete: Valid Token: " + candidateToken + " found.")
       return true
@@ -88,6 +88,7 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
       case '*' => return true
       case '(' => return true
       case ')' => return true
+      case '=' => return true
       case _ => return false
     }
   }

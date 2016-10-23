@@ -12,6 +12,9 @@ trait SyntaxAnalyzerTraits {
   def innerText() : Unit
   def heading() : Unit
   def variableDefine() : Boolean
+  def variableDefineBegin : Unit
+  def variableName : Unit
+  def variableDefineEnd : Unit
   def variableUse() : Unit
   def bold() : Unit
   def italics() : Unit
