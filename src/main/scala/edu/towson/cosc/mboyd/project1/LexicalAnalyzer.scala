@@ -6,92 +6,118 @@ import scala.collection.mutable.ArrayBuffer
 
 class LexicalAnalyzer extends LexicalAnalyzerTraits {
 
-  var sourceLine : String = ""
-  var lexemes  = new ListBuffer[String]
-  var lexeme  = new  ArrayBuffer[Char](100)
-  var nextChar : Char = ' '
-  var lexLength : Int = 0
-  var position : Int = 0
-  def start(line: String) : Unit = {
+  var sourceLine: String = ""
+  var lexemes = new ListBuffer[String]
+  var lexeme = new ArrayBuffer[Char](100)
+  var nextChar: Char = ' '
+  var lexLength: Int = 0
+  var position: Int = 0
+
+  def start(line: String): Unit = {
     initializeLexems()
     sourceLine = line
     position = 0
     getChar()
     getNextToken()
   }
-  def initializeLexems() : Unit = {
-      lexemes = CONSTANTS.validLexemes
+
+  def initializeLexems(): Unit = {
+    lexemes = CONSTANTS.validLexemes
   }
-  def getChar() : Unit = {
-    if(position < sourceLine.length()) {
+
+  def getChar(): Unit = {
+    if (position < sourceLine.length()) {
       nextChar = sourceLine.charAt(position)
-      println("nextChar: " + nextChar)
+      if (Compiler.debugMode)
+        println("nextChar: " + nextChar)
       position += 1
     }
     else
       nextChar = '\n'
   }
 
-  def getNextToken() : Unit = {
+  def getNextToken(): Unit = {
     lexLength = 0
     getNonBlank()
     addChar()
-    getChar()
-    // Continue gathering characters for token
-    while( nextChar != CONSTANTS.EOL ) {
-      addChar()
+    if (!isLexeme(nextChar))
       getChar()
-    }
-    val newToken : String = lexeme.mkString
-    println("newtoken lookup: " + newToken.substring(0, lexLength))
-    if(lookup(newToken.substring(0, lexLength)))
+    // Continue gathering characters for token
+    while (nextChar != CONSTANTS.EOL && !isLexeme(nextChar)) // get chars until end of line (\n)
     {
-      Compiler.currentToken_$eq(newToken.substring(0, lexLength))
-      lexeme.clear()
+      addChar()
+      if (!isLexeme(nextChar))
+        getChar()
     }
   }
-  def lookup(candidateToken : String) : Boolean = {
-    println("Candidate Token: " + candidateToken)
-    if(!lexemes.contains(candidateToken)) {
-      Compiler.Parser.setError()
-      println("Line " + Compiler.lineCount + ": LEXICAL ERROR -" + candidateToken + " is not recognized.")
+
+  def lookup(candidateToken: String): Boolean = {
+    if (Compiler.debugMode)
+      println("Candidate Token: " + candidateToken)
+    if (lexemes.contains(candidateToken)) {
       return true
     }
-    return true
+    else if (candidateToken.endsWith(CONSTANTS.BRACKETE)) {
+      if (Compiler.debugMode)
+        println("EndsW/Brackete: Valid Token: " + candidateToken + " found.")
+      return true
+    }
+    else {
+      Compiler.Parser.setError()
+      println("Line " + Compiler.lineCount + ": LEXICAL ERROR - " + candidateToken + " is not recognized.")
+      lexeme.clear()
+      return false
+    }
   }
-  def isSpace(c : Char) : Boolean = {
+
+  def isSpace(c: Char): Boolean = {
     return c == ' '
   }
-  def getNonBlank() : Unit = {
-    while(isSpace(nextChar) && nextChar != '\n') {
+
+  def getNonBlank(): Unit = {
+    while ((isSpace(nextChar) && nextChar != '\n') || isLexeme(nextChar)) {
       getChar()
     }
   }
 
-  def isLexeme(nextChar : Char) : Boolean = {
+  def isLexeme(nextChar: Char): Boolean = {
     nextChar match {
       case '[' => return true
       case ']' => return true
       case '!' => return true
+      case '*' => return true
+      case '(' => return true
+      case ')' => return true
       case _ => return false
     }
   }
-  def addChar() : Unit = {
-    if(lexLength <= 98)
-    {
-      lexLength+=1
-      lexeme += nextChar // appends nextChar
-      println(lexeme)
-    }
-    else {
-      if(!isSpace(nextChar)) {
-        while(!isSpace(nextChar) && !isLexeme(nextChar)) {
-          getChar()
-        }
-        lexLength = 0
-        getNonBlank()
+
+  def addChar(): Unit = {
+    if (lexLength <= sourceLine.length()) {
+      if (!isLexeme(nextChar) && nextChar != '\n') {
+        lexLength += 1
+        lexeme += nextChar // appends nextChar
+        getChar()
         addChar()
       }
+      else {
+        if (isLexeme(nextChar)) {
+          // add lexeme char at end.
+          lexeme += nextChar
+        }
+        val newToken: String = lexeme.mkString
+        if (Compiler.debugMode)
+          println("newtoken lookup: " + newToken)
+        if (lookup(newToken)) {
+          setCurrentToken(newToken)
+          lexeme.clear()
+        }
+      }
     }
+  }
+
+
+  def setCurrentToken(currToken: String): Unit = {
+    Compiler.currentToken_$eq(currToken)
   }
 }

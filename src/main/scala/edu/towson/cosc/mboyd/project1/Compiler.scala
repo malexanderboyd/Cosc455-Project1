@@ -2,14 +2,23 @@ package edu.towson.cosc.mboyd.project1
 
 
 import scala.io.Source
+
 object Compiler {
 
-  var currentToken : String = ""
+  var currentToken: String = ""
   var lineCount = 0
   val Scanner = new LexicalAnalyzer
   val Parser = new SyntaxAnalyzer
-  var fileContents : String = ""
-
+  val Semantics = new SemanticAnalyzer
+  var fileContents: String = ""
+  var debugMode: Boolean = true
+  var numPasses : Integer = 0
+  //basic <gittex>
+  var hasDocBegin: Boolean = false
+  var hasOptVar: Boolean = false
+  var hasTitle: Boolean = false
+  var hasBody: Boolean = false
+  var hasDocEnd: Boolean = false
 
   def main(args: Array[String]) = {
     // make sure input follows usage rules
@@ -18,33 +27,81 @@ object Compiler {
     // for each line read from file, scan and parse
 
 
-    }
-
-  def Compile(fileName : String) : Unit = {
-  for (line <- Source.fromFile(fileName).getLines()) {
-  // get the first Token
-  println ("Current Line being Analyzed: " + line)
-  Scanner.start (line)
-  // keep lineCount
-  lineCount += 1
-  println ("Current Token going to Parser: " + currentToken)
-  Parser.gittex()
-
-  if (Parser.getError)
-  println ("Error In Parser.")
-}
   }
 
-  def checkInput(inputFile: Array[String]) : Unit = {
-      if(inputFile.length != 1) {
-        println("Usage Error: Wrong number of input arguments.")
-        System.exit(0)
+  def Compile(fileName: String): Unit = {
+    for (line <- Source.fromFile(fileName).getLines()) {
+      // get the first Token
+      if (debugMode)
+        println("Current Line being Analyzed: " + line)
+      Scanner.start(line)
+      // keep lineCount
+      lineCount += 1
+      if (debugMode)
+        println("Current Token going to Parser: " + currentToken)
+
+      if (!hasDocBegin && numPasses == 0) {
+        if (debugMode)
+          println("===== Checking for Doc Begin ====")
+        hasDocBegin = Parser.gittexStart()
+        if (debugMode)
+          println("===== Status of Doc Begin:  " + hasDocBegin + " ====")
+        checkForSyntaxErrors()
       }
-      else if(!inputFile(0).endsWith(".mkd"))
-      {
-        println("Usage Error: Input file should be \".mkd\" extension.")
-        System.exit(0)
+      if (!hasOptVar && hasDocBegin && numPasses == 1) {
+        if (debugMode)
+          println("===== Checking for Optional Variable Def ====")
+        hasOptVar = Parser.variableDefine()
+        if (debugMode)
+          println("===== Has Optional Variable:  " + hasOptVar + " ====")
+        checkForSyntaxErrors()
       }
+      if (!hasTitle && hasDocBegin && numPasses == 1) {
+        if (debugMode)
+          println("===== Checking for Title ====")
+        hasTitle = Parser.Title()
+        if (debugMode)
+          println("===== Has Title:  " + hasTitle + " ====")
+        checkForSyntaxErrors()
+      }
+      if (!hasBody && hasTitle && numPasses > 1) {
+        if (debugMode)
+        println("===== Checking for Body Content ====")
+        hasBody = Parser.body()
+        if (debugMode)
+        println("===== Has body content: " + hasBody + " ====")
+        checkForSyntaxErrors()
+      }
+      if (!hasDocEnd && hasBody) {
+        if (debugMode)
+        println("===== Checking for Gittex End ====")
+        hasDocEnd = Parser.gittexEnd()
+        if (debugMode)
+        println("===== Has Gittex End:  " + hasDocEnd + " ====")
+        checkForSyntaxErrors()
+      }
+
+      numPasses += 1
+    } // end of line input loop
+
+    Semantics.convert()
+
+  }
+
+  def checkForSyntaxErrors(): Unit = {
+    if (Parser.getError)
+      System.exit(-1)
+  }
+
+  def checkInput(inputFile: Array[String]): Unit = {
+    if (inputFile.length != 1) {
+      println("Usage Error: Wrong number of input arguments.")
+      System.exit(0)
+    }
+    else if (!inputFile(0).endsWith(".mkd")) {
+      println("Usage Error: Input file should be \".mkd\" extension.")
+      System.exit(0)
+    }
 
   }
 }

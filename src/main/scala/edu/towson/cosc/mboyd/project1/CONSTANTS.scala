@@ -12,7 +12,7 @@ object CONSTANTS {
   val DOCB : String = "\\BEGIN"
   val DOCE : String = "\\END"
   val TITLEB : String = "\\TITLE["
-  val BRACKETE : String = "["
+  val BRACKETE : String = "]"
   val HEADING : String = "#"
   val PARAB : String = "\\PARAB"
   val PARAE : String = "\\PARAE"
@@ -50,6 +50,8 @@ object CONSTANTS {
   validLexemes += EQSIGN
   validLexemes += USEB
   validLexemes += "\n"
+  validLexemes += ""
+  validLexemes += "\r\n"
 
 
   /* REGEX of each possible Token

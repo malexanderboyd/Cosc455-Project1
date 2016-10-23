@@ -5,4 +5,8 @@ package edu.towson.cosc.mboyd.project1
   */
 class SemanticAnalyzer {
 
+
+    def convert() : Unit = {
+      println("Woohoo valid lexemes and syntax!")
+    }
 }

@@ -6,7 +6,7 @@
 [debug] == resolving dependencies for project1#project1$sources_2.11;1.0 [compile]
 [debug] == resolving dependencies project1#project1$sources_2.11;1.0->org.scala-lang#scala-library;2.11.8 [compile->default(compile)]
 [info] Resolving org.scala-lang#scala-library;2.11.8 ...
-[debug] sbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@119937e
+[debug] sbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@1dc58a2
 [debug] sbt-chain: module revision found in cache: org.scala-lang#scala-library;2.11.8
 [debug] 	found org.scala-lang#scala-library;2.11.8 in sbt-chain
 [debug] 	[2.11.8] org.scala-lang#scala-library;2.11.8
@@ -161,7 +161,7 @@
 [debug] 	[NOT REQUIRED] org.scala-lang.modules#scala-xml_2.11;1.0.4!scala-xml_2.11.jar(src)
 [debug] 	[NOT REQUIRED] org.scala-lang.modules#scala-parser-combinators_2.11;1.0.4!scala-parser-combinators_2.11.jar(src)
 [debug] 	[NOT REQUIRED] jline#jline;2.12.1!jline.jar(src)
-[debug] :: resolution report :: resolve 51ms :: artifacts dl 7ms
+[debug] :: resolution report :: resolve 823ms :: artifacts dl 9ms
 [debug] 	report for project1#project1$sources_2.11;1.0 compile produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\target\resolution-cache\reports\project1-project1$sources_2.11-compile.xml
 [debug] 	report for project1#project1$sources_2.11;1.0 runtime produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\target\resolution-cache\reports\project1-project1$sources_2.11-runtime.xml
 [debug] 	report for project1#project1$sources_2.11;1.0 test produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\target\resolution-cache\reports\project1-project1$sources_2.11-test.xml
@@ -175,4 +175,4 @@
 [debug] 	report for project1#project1$sources_2.11;1.0 docs produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\target\resolution-cache\reports\project1-project1$sources_2.11-docs.xml
 [debug] 	report for project1#project1$sources_2.11;1.0 pom produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\target\resolution-cache\reports\project1-project1$sources_2.11-pom.xml
 [debug] 	report for project1#project1$sources_2.11;1.0 scala-tool produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\target\resolution-cache\reports\project1-project1$sources_2.11-scala-tool.xml
-[debug] 	resolve done (51ms resolve - 7ms download)
+[debug] 	resolve done (823ms resolve - 9ms download)
