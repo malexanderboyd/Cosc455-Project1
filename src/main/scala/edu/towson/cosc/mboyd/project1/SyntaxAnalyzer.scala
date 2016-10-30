@@ -1,13 +1,47 @@
 package edu.towson.cosc.mboyd.project1
 
-import scala.util.matching.Regex
-
 class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
 
   var errorFound: Boolean = false
   var optDef: Boolean = false
-  // regex to find text yaay
-  val isTextExp = "([a-zA-Z_0-9]+)".r
+  // Regex to find token patterns
+
+  val textPattern = """([a-zA-Z_0-9]+)""".r
+
+  // variable use
+  val variableUseStartPattern = """(\\USE\[)""".r // [\USE[
+  val variableUseEndPattern = """[a-zA-z_0-9]+\]""" // varname]
+
+  // variable define
+  val variableDefStartPattern = """(\\DEF\[)""".r   //\DEF[
+  val variableDefBodyPattern = """([a-zA-z_0-9]+)\s?(=)""" // varName =
+  val variableDefEndPattern = """\s?([a-zA-z_0-9]+)(])""" //  varValue]
+  // image
+  val imageStartPattern = """(\!\[)""".r // ![
+  val imageTextPattern = """[a-zA-z_0-9\s]+\]""" // comment]
+  val imageAddressPattern = """(\(.+\))"""// (address)
+
+  //Links
+  val linkStartPattern = """\[[a-zA-z_0-9\s]+\]""".r // [linkname]
+  val linkAddressPattern = """\(.+\)""" // (linkadress)
+
+  //New Line
+  val newLinePattern = """\\\\""".r// lol nice and easy.
+
+  // Unordered List
+  val unorderedListPattern = """\+([a-zA-Z_0-9\s\']+)""".r // + listItem
+
+  //Italics
+  val italicsPattern = """(\*[a-zA-z_0-9\s]+\*)""".r// * text *
+
+  // Bold
+  val boldPattern = """(\*\*[a-zA-z_0-9\s]+\*\*)""".r// ** text **
+
+  // Headings
+  val headingPattern = """(\#[a-zA-z_0-9\s]+)""".r
+
+
+
   // scala is c00L
   def setError() = errorFound = true
 
@@ -21,7 +55,7 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
     if (!errorFound) GittexBegin()
     if (!errorFound) Compiler.Scanner.getNextToken()
     if (!errorFound) EOL()
-    return true;
+    true
   }
 
   def GittexBegin(): Unit = {
@@ -41,11 +75,11 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
 
   def gittexEnd(): Boolean = {
     if (Compiler.currentToken.equalsIgnoreCase(CONSTANTS.DOCE)) {
-        return true
+        true
     } else {
       println("Line: " + Compiler.lineCount + ": SYNTAX ERROR: Expected \\END was expected at end of input " + Compiler.currentToken + " was found.")
       setError()
-      return false
+      false
     }
 
   }
@@ -55,7 +89,7 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
     if (!errorFound)
       Compiler.Scanner.getNextToken()
     if (!errorFound) TitleEnd()
-    return true
+     true
   }
 
   def TitleBegin(): Unit = {
@@ -80,14 +114,65 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
 
 
   override def body(): Boolean = {
-    return true
+      innerText()
+    if(Compiler.currentToken.equalsIgnoreCase(CONSTANTS.DOCE))
+        true
+    else
+        false
   }
 
   override def paragraph(): Unit = ???
 
-  override def innerText(): Unit = ???
+ def variableUse(): Unit = {
+   Compiler.Scanner.getNextToken() //// we already know \USE[ is correct from pattern matching to get here lets get the rest
+   variableUseEnd()  // of the token (looking for text+])
 
-  override def heading(): Unit = ???
+  }
+
+  def variableUseEnd(): Unit = {
+
+    if(Compiler.currentToken.matches(variableUseEndPattern))
+    {
+      if (Compiler.debugMode)
+        println("Found variable value, and closing ]. ---- TODO ADD TO STACK")
+    }
+    else
+      {
+      setError()
+     println("Line: " + Compiler.lineCount + " - Syntax Error: Expected variable name and closing brackete ']' after \\USE[ statement.")
+    }
+  }
+
+
+
+  override def innerText(): Unit = {
+      Compiler.currentToken match {
+        case variableUseStartPattern(_) => variableUse()
+        case headingPattern(_) => heading()
+        case boldPattern(_) => bold()
+        case italicsPattern(_) => italics()
+        case _ => println("No Match " + Compiler.currentToken)
+      }
+  }
+
+
+  override def bold(): Unit = {
+    // We know that the pattern is correct (b/c we got here)
+    // add to stack to convert to html and move on
+    println("Valid BOLD, ---- TODO ADD STACK IMPLEMENTATION")
+  }
+
+  override def italics(): Unit = {
+    // We know that the pattern is correct (b/c we got here)
+    // add to stack to convert to html and move on
+    println("Valid ITALIC, ---- TODO ADD STACK IMPLEMENTATION")
+  }
+
+  override def heading(): Unit = {
+    // We know that the pattern is correct (b/c we got here)
+    // add to stack to convert to html and move on
+    println("Valid Header, ---- TODO ADD STACK IMPLEMENTATION")
+  }
 
   override def variableDefine(): Boolean = {
     if (Compiler.currentToken.equalsIgnoreCase("\\title[")) {
@@ -130,7 +215,7 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
 
   def isText(text: String): Boolean = {
     // yay lets use regex to define text cause it's fun.
-    val totalMatches = isTextExp.findAllIn(text)
+    val totalMatches = textPattern.findAllIn(text)
     if(totalMatches.size == 1) // we only should find 1 match per text token (no whitespace between)
       {
         return true
@@ -165,11 +250,9 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
   }
 
 
-  override def variableUse(): Unit = ???
 
-  override def bold(): Unit = ???
 
-  override def italics(): Unit = ???
+
 
   override def listItem(): Unit = ???
 

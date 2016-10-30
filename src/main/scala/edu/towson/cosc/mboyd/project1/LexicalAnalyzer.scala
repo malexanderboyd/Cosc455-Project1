@@ -62,6 +62,12 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
         println("EndsW/Brackete: Valid Token: " + candidateToken + " found.")
       return true
     }
+    else if(candidateToken.startsWith(CONSTANTS.HEADING) || candidateToken.startsWith(CONSTANTS.IMAGEB))
+      {
+        if (Compiler.debugMode)
+          println("StartsWith/#/!: Valid Token: " + candidateToken + " found.")
+        return true
+      }
     else {
       Compiler.Parser.setError()
       println("Line " + Compiler.lineCount + ": LEXICAL ERROR - " + candidateToken + " is not recognized.")
@@ -85,10 +91,10 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
       case '[' => return true
       case ']' => return true
       case '!' => return true
-      case '*' => return true
       case '(' => return true
       case ')' => return true
       case '=' => return true
+      case '*' => return true
       case _ => return false
     }
   }
@@ -110,7 +116,9 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
         if (Compiler.debugMode)
           println("newtoken lookup: " + newToken)
         if (lookup(newToken)) {
-          setCurrentToken(newToken)
+          if(!newToken.equalsIgnoreCase("\n") || !newToken.equalsIgnoreCase("")) {
+            setCurrentToken(newToken)
+          }
           lexeme.clear()
         }
       }

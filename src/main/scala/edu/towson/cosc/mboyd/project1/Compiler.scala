@@ -67,7 +67,13 @@ object Compiler {
       if (!hasBody && hasTitle && numPasses > 2) {
         if (debugMode)
         println("===== Checking for Body Content ====")
-        hasBody = Parser.body()
+        if(currentToken.equalsIgnoreCase(CONSTANTS.DOCE))
+          {
+            hasBody = true
+          }
+        else {
+          hasBody = Parser.body()
+        }
         if (debugMode)
         println("===== Has body content: " + hasBody + " ====")
         checkForSyntaxErrors()
