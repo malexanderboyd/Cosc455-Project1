@@ -7,18 +7,22 @@ import scala.collection.mutable.ArrayBuffer
 class LexicalAnalyzer extends LexicalAnalyzerTraits {
 
   var sourceLine: String = ""
+  var tempToken : String = ""
   var lexemes = new ListBuffer[String]
   var lexeme = new ArrayBuffer[Char](100)
   var nextChar: Char = ' '
   var lexLength: Int = 0
   var position: Int = 0
+  var useBuffer : String = ""  // used in sending \USE[ \TITLE[ \DEF[
 
   def start(line: String): Unit = {
     initializeLexems()
     sourceLine = line
     position = 0
+    lexeme.clear()
     getChar()
     getNextToken()
+    useBuffer = ""
   }
 
   def initializeLexems(): Unit = {
@@ -38,16 +42,23 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
 
   def getNextToken(): Unit = {
     lexLength = 0
-    getNonBlank()
     addChar()
-    if (!isLexeme(nextChar))
-      getChar()
     // Continue gathering characters for token
-    while (nextChar != CONSTANTS.EOL && !isLexeme(nextChar)) // get chars until end of line (\n)
+    do // get chars until end of line (\n)
     {
+      getChar()
       addChar()
-      if (!isLexeme(nextChar))
-        getChar()
+    }while (!isEOL())
+    tempToken = lexeme.mkString
+    if(lookup(tempToken))
+    {
+      if(useBuffer.length() > 0)
+          tempToken = useBuffer + tempToken
+
+      if(Compiler.debugMode)
+        print("Setting Current Token: " + tempToken)
+
+      setCurrentToken(tempToken)
     }
   }
 
@@ -86,41 +97,74 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     }
   }
 
+
   def isLexeme(nextChar: Char): Boolean = {
     nextChar match {
-      case '[' => return true
-      case ']' => return true
-      case '!' => return true
-      case '(' => return true
-      case ')' => return true
-      case '=' => return true
-      case '*' => return true
-      case _ => return false
+      case '[' =>  true
+      case ']' =>  true
+      case '!' =>  true
+      case '(' =>  true
+      case ')' =>  true
+      case '*' => true
+      case '#' => true
+      case _ =>  false
     }
   }
 
-  def addChar(): Unit = {
-    if (lexLength <= sourceLine.length()) {
-      if (!isLexeme(nextChar) && nextChar != '\n') {
-        lexLength += 1
-        lexeme += nextChar // appends nextChar
-        getChar()
-        addChar()
+
+
+  def identifyBrackette() : Unit = {
+    if (lexeme.startsWith("\\")) {
+      // this means that it could be either \USE[, \DEF[, \TITLE[
+      lexeme.mkString match {
+        case "\\DEF" => lexeme += nextChar
+        case "\\USE" => lexeme += nextChar
+        case "\\TITLE" => lexeme += nextChar
+        case _ => println("Line: " + Compiler.lineCount + " Lexical Error: Undefined Token: " + lexeme.mkString + " expected either \\USE[, \\TITLE[, or \\DEF[")
       }
-      else {
-        if (isLexeme(nextChar)) {
-          // add lexeme char at end.
-          lexeme += nextChar
-        }
-        val newToken: String = lexeme.mkString
-        if (Compiler.debugMode)
-          println("newtoken lookup: " + newToken)
-        if (lookup(newToken)) {
-          if(!newToken.equalsIgnoreCase("\n") || !newToken.equalsIgnoreCase("")) {
-            setCurrentToken(newToken)
-          }
+      val newToken: String = lexeme.mkString
+      if (Compiler.debugMode)
+        println("newtoken lookup: " + newToken)
+      if (lookup(newToken)) {
+         useBuffer = newToken
           lexeme.clear()
         }
+
+    }
+  }
+  def isEOL(): Boolean = {
+    if(nextChar == '\n')
+      true
+    else
+      false
+  }
+
+  def identifyAstr() : Unit = {
+
+  }
+  def addChar(): Unit =
+  {
+    if(!isLexeme(nextChar) && !isEOL()) {
+      if (lexLength <= sourceLine.length()) { // keep getting chars until a lexeme
+        if (nextChar != '\n') {
+          lexLength += 1
+          lexeme += nextChar // appends nextChar
+        }
+      }
+    }
+    else if (isLexeme(nextChar))
+    {
+      // Let's do some language specific lexeme logic yay!
+      nextChar match {
+        case '[' => identifyBrackette()
+        case '*' => identifyAstr()
+        //case '+' => getList()
+        //case '\\' => checkLineBreak()
+        //case '(' => getAddress()
+        //case '!' => getImage()
+        case '#' => lexeme += nextChar
+        case ']' => lexeme += nextChar
+        case _ => println("We got a problem houston.")
       }
     }
   }

@@ -1,6 +1,6 @@
 package edu.towson.cosc.mboyd.project1
 
-class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
+class SyntaxAnalyzer {
 
   var errorFound: Boolean = false
   var optDef: Boolean = false
@@ -9,13 +9,16 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
   val textPattern = """([a-zA-Z_0-9]+)""".r
 
   // variable use
-  val variableUseStartPattern = """(\\USE\[)""".r // [\USE[
-  val variableUseEndPattern = """[a-zA-z_0-9]+\]""" // varname]
+  val variableUsePattern = """(\\USE\[[a-zA-z_0-9]+\])""".r // [\USE[
+
+
+
+  //title pattern
+  val titlePattern = """(\\TITLE\[[a-zA-Z_0-9\s\']+\])""".r
+
 
   // variable define
-  val variableDefStartPattern = """(\\DEF\[)""".r   //\DEF[
-  val variableDefBodyPattern = """([a-zA-z_0-9]+)\s?(=)""" // varName =
-  val variableDefEndPattern = """\s?([a-zA-z_0-9]+)(])""" //  varValue]
+  val variableDefPattern = """(\\DEF\[[a-zA-z_0-9]+\s?\=\s?[a-zA-z_0-9]+\])""".r   //\DEF[
   // image
   val imageStartPattern = """(\!\[)""".r // ![
   val imageTextPattern = """[a-zA-z_0-9\s]+\]""" // comment]
@@ -53,8 +56,8 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
   def gittexStart(): Boolean = {
     resetError()
     if (!errorFound) GittexBegin()
-    if (!errorFound) Compiler.Scanner.getNextToken()
-    if (!errorFound) EOL()
+    //if (!errorFound) Compiler.Scanner.getNextToken()
+    //if (!errorFound) EOL()
     true
   }
 
@@ -85,69 +88,31 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
   }
 
   def Title(): Boolean = {
-    TitleBegin()
-    if (!errorFound)
-      Compiler.Scanner.getNextToken()
-    if (!errorFound) TitleEnd()
-     true
+    var hasTitle : Boolean = false
+    Compiler.currentToken match {
+      case titlePattern(_) => hasTitle = true
+      case _ => setError()
+    }
+    hasTitle
   }
 
-  def TitleBegin(): Unit = {
-    if (Compiler.currentToken.equalsIgnoreCase(CONSTANTS.TITLEB)) //if(test.size == 1) // test.size will return 1 if correctly matches (should only find 1 \Title
-    {
-    }
-    else {
-      println("Line: " + Compiler.lineCount + ": SYNTAX ERROR: Expected either \\TITLE[ or \\DEF[ was expected after \\BEGIN. " + Compiler.currentToken + " was found.")
-      setError()
-    }
-  }
-
-  def TitleEnd(): Unit = {
-    if (Compiler.currentToken.endsWith("]")) {
-      // yay correct syntax, let main title() method call nextToken
-    }
-    else {
-      println("Line: " + Compiler.lineCount + ": SYNTAX ERROR: Expected \\TITLE closing bracket ']' - " + Compiler.currentToken + " was found.")
-      setError()
-    }
-  }
-
-
-  override def body(): Boolean = {
+  def body(): Unit = {
       innerText()
-    if(Compiler.currentToken.equalsIgnoreCase(CONSTANTS.DOCE))
-        true
-    else
-        false
   }
 
-  override def paragraph(): Unit = ???
+  def paragraph(): Unit = ???
 
  def variableUse(): Unit = {
-   Compiler.Scanner.getNextToken() //// we already know \USE[ is correct from pattern matching to get here lets get the rest
-   variableUseEnd()  // of the token (looking for text+])
-
-  }
-
-  def variableUseEnd(): Unit = {
-
-    if(Compiler.currentToken.matches(variableUseEndPattern))
-    {
-      if (Compiler.debugMode)
-        println("Found variable value, and closing ]. ---- TODO ADD TO STACK")
-    }
-    else
-      {
-      setError()
-     println("Line: " + Compiler.lineCount + " - Syntax Error: Expected variable name and closing brackete ']' after \\USE[ statement.")
-    }
+   Compiler.currentToken match {
+     case variableUsePattern(_) => println("We gonna be ight. -- TODO ADD TO STACK")
+     case _ => print("Shit .")
+   }
   }
 
 
-
-  override def innerText(): Unit = {
+   def innerText(): Unit = {
       Compiler.currentToken match {
-        case variableUseStartPattern(_) => variableUse()
+        case variableUsePattern(_) => variableUse()
         case headingPattern(_) => heading()
         case boldPattern(_) => bold()
         case italicsPattern(_) => italics()
@@ -156,42 +121,35 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
   }
 
 
-  override def bold(): Unit = {
+   def bold(): Unit = {
     // We know that the pattern is correct (b/c we got here)
     // add to stack to convert to html and move on
     println("Valid BOLD, ---- TODO ADD STACK IMPLEMENTATION")
   }
 
-  override def italics(): Unit = {
+   def italics(): Unit = {
     // We know that the pattern is correct (b/c we got here)
     // add to stack to convert to html and move on
     println("Valid ITALIC, ---- TODO ADD STACK IMPLEMENTATION")
   }
 
-  override def heading(): Unit = {
+   def heading(): Unit = {
     // We know that the pattern is correct (b/c we got here)
     // add to stack to convert to html and move on
     println("Valid Header, ---- TODO ADD STACK IMPLEMENTATION")
   }
 
-  override def variableDefine(): Boolean = {
+   def variableDefine(): Boolean = {
     if (Compiler.currentToken.equalsIgnoreCase("\\title[")) {
       if (Compiler.debugMode)
         println("\\TITLE[ going to variableDefine() ... aka no optional variable, moving along....")
       return false
     }
-    variableDefineBegin()
-    if(optDef) {
-      if (!errorFound)
-        Compiler.Scanner.getNextToken()
-      variableName()
-      if (!errorFound)
-        Compiler.Scanner.getNextToken()
-      if (!errorFound) variableDefineEnd()
-      return true
+    Compiler.currentToken match {
+      case variableDefPattern(_) => true
+      case _ => print(false)
+              false
     }
-
-    return false
   }
 
   def variableName(): Unit = {
@@ -254,15 +212,15 @@ class SyntaxAnalyzer extends SyntaxAnalyzerTraits {
 
 
 
-  override def listItem(): Unit = ???
+   def listItem(): Unit = ???
 
-  override def innerItem(): Unit = ???
+   def innerItem(): Unit = ???
 
-  override def link(): Unit = ???
+   def link(): Unit = ???
 
-  override def image(): Unit = ???
+   def image(): Unit = ???
 
-  override def newline(): Unit = {
+   def newline(): Unit = {
     if (Compiler.currentToken.equalsIgnoreCase(CONSTANTS.NEWLINE)) {
       Compiler.Scanner.getNextToken()
     } else {

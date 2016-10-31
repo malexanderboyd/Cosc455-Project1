@@ -4,7 +4,7 @@
 		module="cosc455-project1-build"
 		revision="0.1-SNAPSHOT"
 		status="integration"
-		publication="20161015151535"
+		publication="20161031120733"
 		e:sbtVersion="0.13" e:scalaVersion="2.10"
 	>
 		<description>

@@ -72,7 +72,8 @@ object Compiler {
             hasBody = true
           }
         else {
-          hasBody = Parser.body()
+          hasBody = false
+          Parser.body()
         }
         if (debugMode)
         println("===== Has body content: " + hasBody + " ====")

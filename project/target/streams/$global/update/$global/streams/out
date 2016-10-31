@@ -1,4 +1,4 @@
-[info] Updating {file:/E:/Google%20Drive/Fall2016/Prog%20Langs/Cosc455-Project1/project/}cosc455-project1-build...
+[info] Updating {file:/home/alex/IdeaProjects/Project1/Cosc455-Project1/project/}cosc455-project1-build...
 [debug] :: resolving dependencies :: default#cosc455-project1-build;0.1-SNAPSHOT
 [debug] 	confs: [compile, runtime, test, provided, optional, compile-internal, runtime-internal, test-internal, plugin, sources, docs, pom, scala-tool]
 [debug] 	validate = true
@@ -16,7 +16,7 @@
 [debug] == resolving dependencies for default#cosc455-project1-build;0.1-SNAPSHOT [provided]
 [debug] == resolving dependencies default#cosc455-project1-build;0.1-SNAPSHOT->org.scala-lang#scala-library;2.10.4 [provided->default(compile)]
 [info] Resolving org.scala-lang#scala-library;2.10.4 ...
-[debug] sbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@1983297
+[debug] sbt-chain: Checking cache for: sbt.ivyint.MergedDescriptors@564c1eb5
 [debug] sbt-chain: module revision found in cache: org.scala-lang#scala-library;2.10.4
 [debug] 	found org.scala-lang#scala-library;2.10.4 in sbt-chain
 [debug] 	[2.10.4] org.scala-lang#scala-library;2.10.4
@@ -1766,19 +1766,19 @@
 [debug] 	[NOT REQUIRED] org.scala-sbt#apply-macro;0.13.8!apply-macro.jar
 [debug] 	[NOT REQUIRED] org.scala-lang#jline;2.10.4!jline.jar
 [debug] 	[NOT REQUIRED] org.fusesource.jansi#jansi;1.4!jansi.jar
-[debug] :: resolution report :: resolve 856ms :: artifacts dl 22ms
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT compile produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-compile.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT runtime produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-runtime.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT test produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-test.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT provided produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-provided.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT optional produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-optional.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT compile-internal produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-compile-internal.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT runtime-internal produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-runtime-internal.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT test-internal produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-test-internal.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT plugin produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-plugin.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT sources produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-sources.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT docs produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-docs.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT pom produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-pom.xml
-[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT scala-tool produced in E:\Google Drive\Fall2016\Prog Langs\Cosc455-Project1\project\target\resolution-cache\reports\default-cosc455-project1-build-scala-tool.xml
-[debug] 	resolve done (856ms resolve - 22ms download)
+[debug] :: resolution report :: resolve 4475ms :: artifacts dl 215ms
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT compile produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-compile.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT runtime produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-runtime.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT test produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-test.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT provided produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-provided.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT optional produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-optional.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT compile-internal produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-compile-internal.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT runtime-internal produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-runtime-internal.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT test-internal produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-test-internal.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT plugin produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-plugin.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT sources produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-sources.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT docs produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-docs.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT pom produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-pom.xml
+[debug] 	report for default#cosc455-project1-build;0.1-SNAPSHOT scala-tool produced in /home/alex/IdeaProjects/Project1/Cosc455-Project1/project/target/resolution-cache/reports/default-cosc455-project1-build-scala-tool.xml
+[debug] 	resolve done (4475ms resolve - 215ms download)
 [info] Done updating.
