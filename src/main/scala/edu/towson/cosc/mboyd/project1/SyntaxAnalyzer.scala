@@ -17,14 +17,14 @@ class SyntaxAnalyzer {
   def gittexStart(): Boolean = {
     resetError()
     if (!errorFound) GittexBegin()
-    //if (!errorFound) Compiler.Scanner.getNextToken()
-    //if (!errorFound) EOL()
     true
   }
 
   def GittexBegin(): Unit = {
     // Check if current token is the document begin token
+    println("CURRENT TOKEN: " + Compiler.currentToken)
     if (Compiler.currentToken.equalsIgnoreCase(CONSTANTS.DOCB)) {
+
       // add to parseTree
       // add here
       if (Compiler.debugMode)
@@ -59,6 +59,11 @@ class SyntaxAnalyzer {
 
   def body(): Unit = {
       innerText()
+      Compiler.Scanner.getNextToken()
+      while(!Compiler.currentToken.equalsIgnoreCase("\\n"))
+        {
+          body()
+        }
   }
 
   def paragraph(): Unit = ???
@@ -77,28 +82,12 @@ class SyntaxAnalyzer {
         case Patterns.headingPattern(_) => heading()
         case Patterns.boldPattern(_) => bold()
         case Patterns.italicsPattern(_) => italics()
-        case Patterns.textPattern(_) => print("We got dis text")
-        case Patterns.generalTextPattern(_) => print("We got dis general Text Patterrnx")
-        case _ => dissect()
+        case Patterns.textPattern(_) => println("We got dis general Text Patterrnx -- " + Compiler.currentToken)
+        case _ => Compiler.Scanner.getNextToken()
       }
   }
 
-def dissect() : Unit = {
-  var currToken : String = Compiler.currentToken
-  val storageToken : String = currToken
-  if(Patterns.variableUsePattern.findFirstMatchIn(currToken).isDefined)
-    {
-      var starting : Int = currToken.indexOf('\\')
-      val ending : Int = currToken.indexOf(']', starting)
 
-        currToken = currToken.substring(starting, ending+1)
-        Compiler.currentToken = currToken
-        variableUse()
-        Compiler.currentToken = storageToken
-        Compiler.currentToken = Compiler.currentToken.replace(currToken, "")
-        print("CURRNET TOKEN: DISSECT - " + Compiler.currentToken)
-    }
-}
 
 
    def bold(): Unit = {

@@ -2,7 +2,7 @@ package edu.towson.cosc.mboyd.project1
 
 
 import scala.io.Source
-
+import scala.collection.mutable.Queue
 object Compiler {
 
   var currentToken: String = ""
@@ -70,7 +70,7 @@ object Compiler {
           println("===== Has Title:  " + hasTitle + " ====")
         checkForSyntaxErrors()
       }
-      if (!hasBody && hasTitle && numPasses >= 2) {
+      if (!hasBody && hasTitle && numPasses > 2 || !hasBody && numPasses == 2) {
         if (debugMode)
         println("===== Checking for Body Content ====")
         if(currentToken.equalsIgnoreCase(CONSTANTS.DOCE))

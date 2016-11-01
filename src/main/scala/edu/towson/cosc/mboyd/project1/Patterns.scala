@@ -6,7 +6,7 @@ package edu.towson.cosc.mboyd.project1
 object Patterns {
   // Regex to find token patterns
 
-  val textPattern = """([a-zA-Z_0-9]+)""".r
+  val textPattern = """([A-Za-z0-9\,\.\"\:\?_\/]+)""".r
 
   // variable use
   val variableUsePattern = """(\\USE\[[a-zA-z_0-9]+\])""".r // [\USE[
@@ -35,14 +35,16 @@ object Patterns {
   val unorderedListPattern = """(\+([a-zA-Z_0-9\s\']+))""".r // + listItem
 
   //Italics
-  val italicsPattern = """(\*[a-zA-z_0-9\s]+\*)""".r// * text *
+  val italicsPattern = """(\*[a-zA-Z_0-9\s]+\*)""".r// * text *
 
   // Bold
-  val boldPattern = """(\*\*[a-zA-z_0-9\s]+\*\*)""".r// ** text **
+  val boldPattern = """(\*\*[a-zA-Z_0-9\s]+\*\*)""".r// ** text **
 
   // Headings
-  val headingPattern = """(\#[a-zA-z_0-9\s]+)""".r
+  val headingPattern = """(\#[a-zA-Z_0-9\s]+)""".r
 
-  // contains all valid patterns within <inner-text>
-  val generalTextPattern = """\b.+\b""".r
+  //  The only allowed plain text in our language is: A-Z, a-z, 0-9, commas, period, quotes, colons, question marks, underscores and forward slashes.
+  val generalTextPattern = """([A-Za-z0-9\,\.\"\:\?_\/])""".r
+
+  val generalMultiTextPattern = """[A-Za-z0-9\,\.\"\:\?_\/]+""".r
 }

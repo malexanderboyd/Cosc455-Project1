@@ -1,4 +1,5 @@
 \BEGIN
+\DEF[varName = varVal]
 \TITLE[Variables]
 # Tacos are fun
 The members of the \USE[lastname] family are:
