@@ -29,6 +29,11 @@ object Compiler {
 
   }
 
+  def getCurrentToken() : Unit = {
+    if (debugMode)
+      println("Current Token going to Parser: " + currentToken)
+  }
+
   def Compile(fileName: String): Unit = {
     for (line <- Source.fromFile(fileName).getLines()) {
       // get the first Token
@@ -37,12 +42,11 @@ object Compiler {
       Scanner.start(line)
       // keep lineCount
       lineCount += 1
-      if (debugMode)
-        println("Current Token going to Parser: " + currentToken)
 
       if (!hasDocBegin && numPasses == 0) {
         if (debugMode)
           println("===== Checking for Doc Begin ====")
+        getCurrentToken()
         hasDocBegin = Parser.gittexStart()
         if (debugMode)
           println("===== Status of Doc Begin:  " + hasDocBegin + " ====")
@@ -51,6 +55,7 @@ object Compiler {
       if (!hasOptVar && hasDocBegin && numPasses == 1) {
         if (debugMode)
           println("===== Checking for Optional Variable Def ====")
+        getCurrentToken()
         hasOptVar = Parser.variableDefine()
         if (debugMode)
           println("===== Has Optional Variable:  " + hasOptVar + " ====")
@@ -59,12 +64,13 @@ object Compiler {
       if ( (!hasTitle && hasDocBegin && !hasOptVar && numPasses == 1) || (!hasTitle && numPasses == 2 && hasDocBegin) ) {
         if (debugMode)
           println("===== Checking for Title ====")
+        getCurrentToken()
         hasTitle = Parser.Title()
         if (debugMode)
           println("===== Has Title:  " + hasTitle + " ====")
         checkForSyntaxErrors()
       }
-      if (!hasBody && hasTitle && numPasses > 2) {
+      if (!hasBody && hasTitle && numPasses >= 2) {
         if (debugMode)
         println("===== Checking for Body Content ====")
         if(currentToken.equalsIgnoreCase(CONSTANTS.DOCE))
@@ -73,15 +79,16 @@ object Compiler {
           }
         else {
           hasBody = false
+          getCurrentToken()
           Parser.body()
         }
-        if (debugMode)
-        println("===== Has body content: " + hasBody + " ====")
         checkForSyntaxErrors()
       }
       numPasses += 1
     } // end of line input loop
 
+    if (debugMode)
+      println("===== Has body content: " + hasBody + " ====")
     if (!hasDocEnd && hasBody) {
       if (debugMode)
         println("===== Checking for Gittex End ====")

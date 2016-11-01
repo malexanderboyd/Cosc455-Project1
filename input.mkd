@@ -1,9 +1,5 @@
 \BEGIN
-\DEF[Tacos = TacoSalad]
-\TITLE[Hello It's me]
-\USE[Tacos]
-# funtimes
-* aw lawd *
-** oh snap **
-* watch out * for dem ** sneaky ** tigers
+\TITLE[Variables]
+# Tacos are fun
+The members of the \USE[lastname] family are:
 \END

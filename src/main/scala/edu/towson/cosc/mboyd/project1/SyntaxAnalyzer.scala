@@ -4,45 +4,6 @@ class SyntaxAnalyzer {
 
   var errorFound: Boolean = false
   var optDef: Boolean = false
-  // Regex to find token patterns
-
-  val textPattern = """([a-zA-Z_0-9]+)""".r
-
-  // variable use
-  val variableUsePattern = """(\\USE\[[a-zA-z_0-9]+\])""".r // [\USE[
-
-
-
-  //title pattern
-  val titlePattern = """(\\TITLE\[[a-zA-Z_0-9\s\']+\])""".r
-
-
-  // variable define
-  val variableDefPattern = """(\\DEF\[[a-zA-z_0-9]+\s?\=\s?[a-zA-z_0-9]+\])""".r   //\DEF[
-  // image
-  val imageStartPattern = """(\!\[)""".r // ![
-  val imageTextPattern = """[a-zA-z_0-9\s]+\]""" // comment]
-  val imageAddressPattern = """(\(.+\))"""// (address)
-
-  //Links
-  val linkStartPattern = """\[[a-zA-z_0-9\s]+\]""".r // [linkname]
-  val linkAddressPattern = """\(.+\)""" // (linkadress)
-
-  //New Line
-  val newLinePattern = """\\\\""".r// lol nice and easy.
-
-  // Unordered List
-  val unorderedListPattern = """\+([a-zA-Z_0-9\s\']+)""".r // + listItem
-
-  //Italics
-  val italicsPattern = """(\*[a-zA-z_0-9\s]+\*)""".r// * text *
-
-  // Bold
-  val boldPattern = """(\*\*[a-zA-z_0-9\s]+\*\*)""".r// ** text **
-
-  // Headings
-  val headingPattern = """(\#[a-zA-z_0-9\s]+)""".r
-
 
 
   // scala is c00L
@@ -90,7 +51,7 @@ class SyntaxAnalyzer {
   def Title(): Boolean = {
     var hasTitle : Boolean = false
     Compiler.currentToken match {
-      case titlePattern(_) => hasTitle = true
+      case Patterns.titlePattern(_) => hasTitle = true
       case _ => setError()
     }
     hasTitle
@@ -104,7 +65,7 @@ class SyntaxAnalyzer {
 
  def variableUse(): Unit = {
    Compiler.currentToken match {
-     case variableUsePattern(_) => println("We gonna be ight. -- TODO ADD TO STACK")
+     case Patterns.variableUsePattern(_) => println("We gonna be ight. -- TODO ADD TO STACK")
      case _ => print("Shit .")
    }
   }
@@ -112,30 +73,52 @@ class SyntaxAnalyzer {
 
    def innerText(): Unit = {
       Compiler.currentToken match {
-        case variableUsePattern(_) => variableUse()
-        case headingPattern(_) => heading()
-        case boldPattern(_) => bold()
-        case italicsPattern(_) => italics()
-        case _ => println("No Match " + Compiler.currentToken)
+        case Patterns.variableUsePattern(_) => variableUse()
+        case Patterns.headingPattern(_) => heading()
+        case Patterns.boldPattern(_) => bold()
+        case Patterns.italicsPattern(_) => italics()
+        case Patterns.textPattern(_) => print("We got dis text")
+        case Patterns.generalTextPattern(_) => print("We got dis general Text Patterrnx")
+        case _ => dissect()
       }
   }
+
+def dissect() : Unit = {
+  var currToken : String = Compiler.currentToken
+  val storageToken : String = currToken
+  if(Patterns.variableUsePattern.findFirstMatchIn(currToken).isDefined)
+    {
+      var starting : Int = currToken.indexOf('\\')
+      val ending : Int = currToken.indexOf(']', starting)
+
+        currToken = currToken.substring(starting, ending+1)
+        Compiler.currentToken = currToken
+        variableUse()
+        Compiler.currentToken = storageToken
+        Compiler.currentToken = Compiler.currentToken.replace(currToken, "")
+        print("CURRNET TOKEN: DISSECT - " + Compiler.currentToken)
+    }
+}
 
 
    def bold(): Unit = {
     // We know that the pattern is correct (b/c we got here)
     // add to stack to convert to html and move on
+     if (Compiler.debugMode)
     println("Valid BOLD, ---- TODO ADD STACK IMPLEMENTATION")
   }
 
    def italics(): Unit = {
     // We know that the pattern is correct (b/c we got here)
     // add to stack to convert to html and move on
+     if (Compiler.debugMode)
     println("Valid ITALIC, ---- TODO ADD STACK IMPLEMENTATION")
   }
 
    def heading(): Unit = {
     // We know that the pattern is correct (b/c we got here)
     // add to stack to convert to html and move on
+     if (Compiler.debugMode)
     println("Valid Header, ---- TODO ADD STACK IMPLEMENTATION")
   }
 
@@ -146,9 +129,8 @@ class SyntaxAnalyzer {
       return false
     }
     Compiler.currentToken match {
-      case variableDefPattern(_) => true
-      case _ => print(false)
-              false
+      case Patterns.variableDefPattern(_) => true
+      case _ => false
     }
   }
 
@@ -173,7 +155,7 @@ class SyntaxAnalyzer {
 
   def isText(text: String): Boolean = {
     // yay lets use regex to define text cause it's fun.
-    val totalMatches = textPattern.findAllIn(text)
+    val totalMatches = Patterns.textPattern.findAllIn(text)
     if(totalMatches.size == 1) // we only should find 1 match per text token (no whitespace between)
       {
         return true
