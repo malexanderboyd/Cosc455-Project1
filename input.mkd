@@ -1,6 +1,16 @@
 \BEGIN
-\DEF[varName = varVal]
-\TITLE[Variables]
-# Tacos are fun
-The members of the \USE[lastname] family are:
+	\TITLE[Variables]
+	\DEF[lastname = Simpson]
+	\DEF[hname = Homer]
+	\DEF[bname = Bart]
+
+	\PARB
+		The members of the \USE[lastname] family are:
+	\PARE
+
+	+ \USE[hname]  \USE[lastname]
+	+ Marge \USE[lastname]
+	+ \USE[bname]  \USE[lastname]
+	+ Lisa \USE[lastname]
+	+ Maggie \USE[lastname]
 \END

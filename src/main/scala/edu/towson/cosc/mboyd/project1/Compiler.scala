@@ -37,67 +37,81 @@ object Compiler {
   def Compile(fileName: String): Unit = {
     for (line <- Source.fromFile(fileName).getLines()) {
       // get the first Token
-      if (debugMode)
-        println("Current Line being Analyzed: " + line)
-      Scanner.start(line)
-      // keep lineCount
-      lineCount += 1
+      if (!hasDocEnd) {
+        if (debugMode)
+          println("Current Line being Analyzed: " + line)
+        Scanner.start(line)
+        // keep lineCount
+        lineCount += 1
 
-      if (!hasDocBegin && numPasses == 0) {
-        if (debugMode)
-          println("===== Checking for Doc Begin ====")
-        getCurrentToken()
-        hasDocBegin = Parser.gittexStart()
-        if (debugMode)
-          println("===== Status of Doc Begin:  " + hasDocBegin + " ====")
-        checkForSyntaxErrors()
-      }
-      if (!hasOptVar && hasDocBegin && numPasses == 1) {
-        if (debugMode)
-          println("===== Checking for Optional Variable Def ====")
-        getCurrentToken()
-        hasOptVar = Parser.variableDefine()
-        if (debugMode)
-          println("===== Has Optional Variable:  " + hasOptVar + " ====")
-        checkForSyntaxErrors()
-      }
-      if ( (!hasTitle && hasDocBegin && !hasOptVar && numPasses == 1) || (!hasTitle && numPasses == 2 && hasDocBegin) ) {
-        if (debugMode)
-          println("===== Checking for Title ====")
-        getCurrentToken()
-        hasTitle = Parser.Title()
-        if (debugMode)
-          println("===== Has Title:  " + hasTitle + " ====")
-        checkForSyntaxErrors()
-      }
-      if (!hasBody && hasTitle && numPasses > 2 || !hasBody && numPasses == 2) {
-        if (debugMode)
-        println("===== Checking for Body Content ====")
-        if(currentToken.equalsIgnoreCase(CONSTANTS.DOCE))
-          {
-            hasBody = true
-          }
-        else {
-          hasBody = false
+        if (!hasDocBegin && numPasses == 0) {
+          if (debugMode)
+            println("===== Checking for Doc Begin ====")
           getCurrentToken()
-          Parser.body()
+          if (!Scanner.getError)
+            hasDocBegin = Parser.gittexStart()
+          if (debugMode)
+            println("===== Status of Doc Begin:  " + hasDocBegin + " ====")
+          checkForSyntaxErrors()
         }
-        checkForSyntaxErrors()
+        if (!hasOptVar && hasDocBegin && numPasses == 1) {
+          if (debugMode)
+            println("===== Checking for Optional Variable Def ====")
+          getCurrentToken()
+          if (!Scanner.getError)
+            hasOptVar = Parser.variableDefine()
+          if (debugMode)
+            println("===== Has Optional Variable:  " + hasOptVar + " ====")
+          checkForSyntaxErrors()
+        }
+        if ((!hasTitle && hasDocBegin && !hasOptVar && numPasses == 1) || (!hasTitle && numPasses == 2 && hasDocBegin)) {
+          if (debugMode)
+            println("===== Checking for Title ====")
+          getCurrentToken()
+          if (!Scanner.getError)
+            hasTitle = Parser.Title()
+          if (debugMode)
+            println("===== Has Title:  " + hasTitle + " ====")
+          checkForSyntaxErrors()
+        }
+        if (!hasBody && hasTitle && numPasses > 2 || !hasBody && numPasses == 2) {
+          if (debugMode)
+            println("===== Checking for Body Content ====")
+          if (currentToken.equalsIgnoreCase(CONSTANTS.DOCE)) {
+            hasBody = true
+            hasDocEnd = true
+            Parser.gittexEnd()
+          }
+          else {
+            hasBody = false
+            getCurrentToken()
+            if (!Scanner.getError)
+              Parser.body()
+          }
+          checkForSyntaxErrors()
+        }
+        numPasses += 1
       }
-      numPasses += 1
-    } // end of line input loop
+    }// end of line input loop
 
+
+      if (Parser.parabcounter != Parser.pareEcounter) {
+        if (Parser.parabcounter > Parser.pareEcounter)
+          println("SYNTAX ERROR: Paragraph does not have closing paragraph (\\PARE)")
+        else
+          println("SYNTAX ERROR: Paragraph does not have starting paragraph (\\PARE) found")
+      }
+      if (debugMode)
+        println("===== Has body content: " + hasBody + " ====")
+      if (!hasDocEnd && hasBody) {
+        if (debugMode)
+          println("===== Checking for Gittex End ====")
+        if (!Scanner.getError)
+          hasDocEnd = Parser.gittexEnd()
+      }
     if (debugMode)
-      println("===== Has body content: " + hasBody + " ====")
-    if (!hasDocEnd && hasBody) {
-      if (debugMode)
-        println("===== Checking for Gittex End ====")
-      hasDocEnd = Parser.gittexEnd()
-      if (debugMode)
-        println("===== Has Gittex End:  " + hasDocEnd + " ====")
-      checkForSyntaxErrors()
-    }
-
+      println("===== Has Gittex End:  " + hasDocEnd + " ====")
+    checkForSyntaxErrors()
     Semantics.convert()
 
   }

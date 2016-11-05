@@ -4,8 +4,8 @@ class SyntaxAnalyzer {
 
   var errorFound: Boolean = false
   var optDef: Boolean = false
-
-
+  var parabcounter : Integer = 0
+  var pareEcounter : Integer = 0 // lol pls dont have 9999 parab and parae. Terrible way to implement this to check if para end and start, but these should be equal if correct.
   // scala is c00L
   def setError() = errorFound = true
 
@@ -56,9 +56,11 @@ class SyntaxAnalyzer {
     }
     hasTitle
   }
-
+var numBodyPasses : Integer = 0
   def body(): Unit = {
+      variableDefine()
       innerText()
+      //paragraph()
       Compiler.Scanner.getNextToken()
       while(!Compiler.currentToken.equalsIgnoreCase("\\n"))
         {
@@ -66,7 +68,17 @@ class SyntaxAnalyzer {
         }
   }
 
-  def paragraph(): Unit = ???
+  def paragraph(): Unit = {
+    parabcounter += 1
+    if(Compiler.debugMode)
+      println("VALID PARAB FOUND -- ADD STACK")
+  }
+
+  def paragraphEnd() : Unit = {
+    pareEcounter += 1
+    if(Compiler.debugMode)
+      println("VALID PARE FOUND -- ADD STACK")
+  }
 
  def variableUse(): Unit = {
    Compiler.currentToken match {
@@ -82,13 +94,47 @@ class SyntaxAnalyzer {
         case Patterns.headingPattern(_) => heading()
         case Patterns.boldPattern(_) => bold()
         case Patterns.italicsPattern(_) => italics()
-        case Patterns.textPattern(_) => println("We got dis general Text Patterrnx -- " + Compiler.currentToken)
-        case _ => Compiler.Scanner.getNextToken()
+        case Patterns.listPattern(_) => listItem()
+        case Patterns.imagePattern(_) => image()
+        case Patterns.linkPattern(_) => link()
+        case Patterns.newLinePattern(_) => lineBreak()
+        case Patterns.textPattern(_) => text()
+        case Patterns.paragraphBeginPattern(_) => paragraph()
+        case Patterns.paragraphEndPattern(_) => paragraphEnd()
+        case Patterns.variableDefPattern(_) => variableDefine()
+        case _ => println("Line: " + Compiler.lineCount + " Syntax Error: Invalid Syntax: " + Compiler.currentToken)
+                  setError()
       }
   }
 
+  def innerItem() : Unit = {
+    while(!Compiler.currentToken.equalsIgnoreCase("\\n")) {
+      Compiler.currentToken match {
+        case Patterns.variableUsePattern(_) => variableUse()
+        case Patterns.boldPattern(_) => bold()
+        case Patterns.italicsPattern(_) => italics()
+        case Patterns.linkPattern(_) => link()
+        case Patterns.textPattern(_) => text()
+        case _ => Compiler.Scanner.getNextToken()
+      }
+      Compiler.Scanner.getNextToken()
+    }
+  }
 
+  def text() : Unit = {
 
+    if(Compiler.debugMode)
+      println("Found Text -- TODO IMPLEMENT STACK")
+  }
+  def lineBreak() : Unit = {
+    if(Compiler.debugMode)
+      println("VALID LINEBREAK --- TODO ADD STACK IMPLEMENTATION")
+  }
+
+  def address() : Unit = {
+    if(Compiler.debugMode)
+      println("VALID ADDRESS --- TODO ADD STACK IMPLEMENTATION")
+  }
 
    def bold(): Unit = {
     // We know that the pattern is correct (b/c we got here)
@@ -117,6 +163,8 @@ class SyntaxAnalyzer {
         println("\\TITLE[ going to variableDefine() ... aka no optional variable, moving along....")
       return false
     }
+     if(Compiler.debugMode)
+        println("VALID DEFINE --- TODO ADD STACK")
     Compiler.currentToken match {
       case Patterns.variableDefPattern(_) => true
       case _ => false
@@ -153,43 +201,30 @@ class SyntaxAnalyzer {
   }
 
 
-  def variableDefineBegin(): Unit = {
-    if (Compiler.currentToken.equalsIgnoreCase(CONSTANTS.DEFB)) //if(test.size == 1) // test.size will return 1 if correctly matches (should only find 1 \Title
-    {
-      if (Compiler.debugMode)
-        println("Valid \\DEF[ Found.")
-      optDef = true
-    }
-    else {
-     // println("Line: " + Compiler.lineCount + ": SYNTAX ERROR: Expected either \\TITLE[ or \\DEF[ was expected after \\BEGIN. " + Compiler.currentToken + " was found.")
-     // setError()
-      // let's let Title() clean up the error it not finding a \\DEF[
-      optDef = false
-    }
-  }
-
-  def variableDefineEnd(): Unit = {
-    if (Compiler.currentToken.endsWith("]")) {
-      // yay correct syntax, let main title() method call nextToken
-    }
-    else {
-      println("Line: " + Compiler.lineCount + ": SYNTAX ERROR: Expected \\DEF[ closing bracket ']' - " + Compiler.currentToken + " was found.")
-      setError()
-    }
-  }
 
 
 
 
 
+   def listItem(): Unit = {
+     innerItem()
+     Compiler.Scanner.getNextToken()
+     while(!Compiler.currentToken.equalsIgnoreCase("\\n"))
+     {
+       listItem()
+     }
+   }
 
-   def listItem(): Unit = ???
 
-   def innerItem(): Unit = ???
+   def link(): Unit = {
+     if (Compiler.debugMode)
+  println("Valid LINK, ---- TODO ADD STACK IMPLEMENTATION")
+   }
 
-   def link(): Unit = ???
-
-   def image(): Unit = ???
+   def image(): Unit = {
+     if (Compiler.debugMode)
+       println("Valid IMAGE, ---- TODO ADD STACK IMPLEMENTATION")
+   }
 
    def newline(): Unit = {
     if (Compiler.currentToken.equalsIgnoreCase(CONSTANTS.NEWLINE)) {

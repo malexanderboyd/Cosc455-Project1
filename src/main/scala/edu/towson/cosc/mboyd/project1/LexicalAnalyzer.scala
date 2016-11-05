@@ -16,6 +16,8 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
   var lineContainsLexemes : Boolean = false
   var isText : Boolean = false
   var foundTxtToken : Boolean = false
+  var tempPos : Int = 0
+  var tempChar : Char = ' '
   def setError() = errorFound = true
 
   def resetError() = errorFound = false
@@ -62,6 +64,7 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
           addLexemeChar() // addChar will handle finding valid lexemes in tokens.
           setCurrentToken(lexeme.mkString)
           getChar()
+
         }
       else if(isValidText(nextChar.toString))
         {
@@ -77,7 +80,11 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
             }
           }
         }
-      if(!lexeme.mkString.contains("\\n"))
+      else
+        {
+          getChar()
+        }
+      if(!lexeme.mkString.contains("\\n") && !lexeme.mkString.contains("\\t") && !lexeme.mkString.contains(""))
         {
           setCurrentToken(lexeme.mkString)
           foundTxtToken = true
@@ -98,24 +105,6 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     if (lexemes.contains(candidateToken)) {
        true
     }
-    else if (candidateToken.endsWith(CONSTANTS.BRACKETE) || candidateToken.endsWith(CONSTANTS.EQSIGN) || candidateToken.endsWith(CONSTANTS.ITALICS) || candidateToken.endsWith(CONSTANTS.BOLD)) {
-      if (Compiler.debugMode)
-        println("EndsW/Brackete: Valid Token: " + candidateToken + " found.")
-       true
-    }
-    else if(candidateToken.startsWith(CONSTANTS.HEADING) || candidateToken.startsWith(CONSTANTS.IMAGEB))
-      {
-        if (Compiler.debugMode)
-          println("StartsWith/#/!: Valid Token: " + candidateToken + " found.")
-         true
-      }
-    else if(lineContainsLexemes) // we assume everything between text is valid due to checks during lexeme parsing
-      {
-        if (Compiler.debugMode)
-          println("lineContainsLexemes: Valid Token: " + candidateToken + " found.")
-        lineContainsLexemes = false
-        true
-      }
     else if(isText)
       {
         if (Compiler.debugMode)
@@ -126,18 +115,9 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     else {
       Compiler.Parser.setError()
       println("Line " + Compiler.lineCount + ": LEXICAL ERROR - " + candidateToken + " is not recognized.")
+      setError()
       lexeme.clear()
        false
-    }
-  }
-
-  def isSpace(c: Char): Boolean = {
-     c == ' '
-  }
-
-  def getNonBlank(): Unit = {
-    while ((isSpace(nextChar) && nextChar != '\n') || isLexeme(nextChar)) {
-      getChar()
     }
   }
 
@@ -157,43 +137,65 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     }
   }
 
+
+
   def identifySlash() : Unit = {
-      lexeme += nextChar
-    while(!isEOL(nextChar) && !nextChar.toString.equalsIgnoreCase("]"))
-      {
-        getChar()
-        if(!isLexeme(nextChar))
-          addChar()
-        else
-          addLexemeChar()
-      }
+   tempPos = position
+   tempChar = nextChar
+    getChar() // get next character
+    // if next char is another\\ then the input it newline.
+    if(nextChar.toString.equalsIgnoreCase(CONSTANTS.NEWLINE))
+    {
+        addNewLine()
+    }
+    else // not starting either \\use, def,etc
+    {
+        addLexemeType()
+    }
   }
 
+  //Deals with adding \\use \\def \\title, \begin.
+  def addLexemeType() : Unit = {
+    nextChar = tempChar
+    position = tempPos
+    lexeme += nextChar // only add one \
+    while(!isEOL(nextChar) && !nextChar.toString.equalsIgnoreCase("["))
+    {
+      getChar()
+      if(!isLexeme(nextChar))
+        addChar()
+      else
+        addLexemeChar()
+
+    }
+  }
+
+  def addNewLine(): Unit =
+  {
+    lexeme += nextChar
+    lexeme += nextChar
+    lookup(lexeme.mkString)
+  }
   def findClosingBrackette() : Unit = {
     lexeme += nextChar // add [ to current lexeme buffer
-    while(!nextChar.toString.equals(CONSTANTS.BRACKETE) && !isEOL(nextChar))
-      {
+      while (!nextChar.toString.equals(CONSTANTS.BRACKETE) && !isEOL(nextChar)) {
         getChar()
         addChar()
       }
-    if(isEOL(nextChar) && !nextChar.toString.equals(CONSTANTS.BRACKETE))
-      {
+      if (isEOL(nextChar) && !nextChar.toString.equals(CONSTANTS.BRACKETE)) {
         setError()
-        println("Line: "+ Compiler.lineCount  + " Syntax Error - Expected closing brackette ']' after '[' usage.")
-      }
-    if(lexeme.contains('\\')) // possibly \USE \DEF \TITLE
-      {
-        checkBracketteUsage()
-        lineContainsLexemes = true
+        println("Line: " + Compiler.lineCount + " Syntax Error - Expected closing brackette ']' after '[' usage.")
       }
   }
+
   def isEOL(nc :Char): Boolean = {
       nc.toString.contains("\n")
   }
 
+
   def identifyAstr() : Unit = {
-    val tempPos : Int = position
-    val tempChar : Char = nextChar
+    var tempPos : Int = position
+    var tempChar : Char = nextChar
     var foundTrailing : Boolean = false
     getChar() // get next character
     // if next char is another * then the input it bold.
@@ -201,44 +203,87 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
       {
         lexeme += nextChar
         lexeme += nextChar
+        while(!foundTrailing || isEOL(nextChar)) {
+          getChar()
+          if (!nextChar.toString.equalsIgnoreCase(CONSTANTS.ITALICS))
+            addChar()
+          else {
+            tempPos = position // repeat to find bold closing
+            tempChar = nextChar
+            getChar()
+            if (nextChar.toString.equalsIgnoreCase(CONSTANTS.ITALICS)) {
+              lexeme += nextChar
+              lexeme += nextChar
+              foundTrailing = true
+            }
+            else {
+              println("Line : " + Compiler.lineCount + " Lexical Error: Unmatched **, expected closing ** (such as ** value ** ).")
+            }
+          }
+        }
+
       }
     else // not bold, italics
       {
         nextChar = tempChar
         position = tempPos
         lexeme += nextChar // only add one *
-        getChar()
         while(!foundTrailing || isEOL(nextChar))
-          {
-            getChar()
-            if(!nextChar.toString.equalsIgnoreCase(CONSTANTS.ITALICS))
-              addChar()
-            else {
-              foundTrailing = true
-              lexeme += nextChar
-            }
-          }
-          if(!foundTrailing)
-            {
-              println("Line : " + Compiler.lineCount + " Lexical Error: Unmatched *, expected closing * (such as * value * ).")
-              setError()
-            }
+    {
+      getChar()
+      if(!nextChar.toString.equalsIgnoreCase(CONSTANTS.ITALICS))
+        addChar()
+      else {
+        foundTrailing = true
+        lexeme += nextChar
       }
+    }
+    if(!foundTrailing)
+    {
+      println("Line : " + Compiler.lineCount + " Lexical Error: Unmatched *, expected closing * (such as * value * ).")
+      setError()
+    }
+
+  }
   }
 
 def addLexemeChar() : Unit = {
   nextChar match {
     case '[' => findClosingBrackette()
     case '*' => identifyAstr()
-    //case '+' => getList()
+    case '+' => getList()
     case '\\' => identifySlash()
-    //case '(' => getAddress()
-    //case '!' => getImage()
+    case '(' => getAddress()
+    case '!' => getImage()
     case '#' => getHeading()
     case ']' => lexeme += nextChar
-    case _ => println("We got a problem houston. Unknown Lexeme")
+    case _ => println("We got a problem houston. Unknown Lexeme " + nextChar + " in addLexemeChar()")
   }
 }
+
+def  getImage() : Unit = {
+  lexeme += nextChar // add '!'
+  while (!isEOL(nextChar) && !nextChar.toString.equals(CONSTANTS.ADDRESSE) )
+  {
+    getChar()
+    addChar()
+  }
+}
+  def getList() : Unit = {
+    lexeme += nextChar // add '+'
+  }
+  def getAddress() : Unit = {
+    lexeme += nextChar // don't need to lookup since we already kinda prelooked up in isLexeme(), this is done in for all lexmes, so kinda replaces the need to look up each individual constant.
+      while (!nextChar.toString.equals(CONSTANTS.ADDRESSE) && !isEOL(nextChar)) {
+        getChar()
+        addChar()
+      }
+      if (isEOL(nextChar) && !nextChar.toString.equals(CONSTANTS.BRACKETE)) {
+        setError()
+        println("Line: " + Compiler.lineCount + " Syntax Error - Expected closing parenthesis ')' after '(' usage.")
+      }
+    }
+
   def addChar(): Unit =
   {
       if (lexLength <= sourceLine.length()) { // keep getting chars until a lexeme
@@ -251,30 +296,11 @@ def addLexemeChar() : Unit = {
 
 def getHeading() : Unit = {
   lexeme += nextChar // add '#'
-  while(!isEOL(nextChar)) // headings on their own line
-  {
-    getChar()
-    addChar()
-  }
-}
 
-def checkBracketteUsage() : Unit = {
-  // we know that the lexeme contains atleast 1 '\'. Let's try to pattern match basic \TITLE[text], \USE[varname], \DEF[varname = varvalue]
-  // extract from \ to the closing ] (should contain all our information
-  val starting = lexeme.indexOf('\\')
-  val ending = lexeme.indexOf(']')
-  val token : String = lexeme.subSequence(starting, ending+1).toString
-    if(Compiler.debugMode)
-    println("CHECKBRACKETTE: LOOKUP TOKEN VALUE --- : " + token)
-  if(lookup(token))
+    while (!isEOL(nextChar)) // headings on their own line
     {
-      lineContainsLexemes = true
-    }
-  else
-    {
-      setError()
-      println("Line: " + Compiler.lineCount + " LEXICAL ERROR: Unidentified Token: " + token)
-      lineContainsLexemes = false
+      getChar()
+      addChar()
     }
 }
   def setCurrentToken(currToken: String): Unit = {
