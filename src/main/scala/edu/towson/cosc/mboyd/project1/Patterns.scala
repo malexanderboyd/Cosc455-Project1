@@ -6,19 +6,19 @@ package edu.towson.cosc.mboyd.project1
 object Patterns {
   // Regex to find token patterns
 
-  val beginPattern = """(\\BEGIN)""".r
-  val endPattern = """(\\END)""".r
+  val beginPattern = """(\\[b,B][E,e][G,g][I,i][N,n])""".r
+  val endPattern = """(\\[E,e][n,N][D,d])""".r
   val textPattern = """([A-Za-z0-9\,\.\"\:\?_\/]+)""".r
 
   // variable use
-  val variableUsePattern = """(\\USE\[[a-zA-z_0-9]+\])""".r // [\USE[
+  val variableUsePattern = """(\\[U,u][S,s][E,e]\[[a-zA-z_0-9]+\])""".r // [\USE[
 
 
   //title pattern
-  val titlePattern = """(\\TITLE\[[a-zA-Z_0-9\s\']+\])""".r
+  val titlePattern = """(\\[T,t][I,i][T,t][L,l][E,e]\[[a-zA-Z_0-9\s\']+\])""".r
 
   // variable define
-  val variableDefPattern = """(\\DEF\[[a-zA-z_0-9]+\s?\=\s?[a-zA-z_0-9]+\])""".r   //\DEF[
+  val variableDefPattern = """(\\[D,d][E,e][F,f]\[[a-zA-z_0-9]+\s?\=\s?[a-zA-z_0-9]+\])""".r   //\DEF[
 
 
   //Italics
@@ -42,8 +42,8 @@ object Patterns {
 
   val listPattern = """(\+.?)""".r
 
-  val paragraphBeginPattern = """(\\PARB)""".r
-  val paragraphEndPattern = """(\\PARE)""".r
+  val paragraphBeginPattern = """(\\[P,p][A,a][R,r][B,b])""".r
+  val paragraphEndPattern = """(\\[P,p][A,a][R,r][E,e])""".r
   //    //case '+' => getList()
   //case '\\' => identifySlash()
   //case '(' => getAddress()

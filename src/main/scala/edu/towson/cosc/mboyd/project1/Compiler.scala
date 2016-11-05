@@ -123,7 +123,7 @@ object Compiler {
 
   /* * Hack Scala/Java function to take a String filename and open in default web browswer. */
   def openHTMLFileInBrowser(htmlFileStr : String) = {
-    val file : File = new File(htmlFileStr.trim)
+    val file : File = new File(htmlFileStr + ".html")
     println(file.getAbsolutePath)
     if (!file.exists())
       sys.error("File " + htmlFileStr + " does not exist.")
