@@ -37,10 +37,13 @@ object Compiler {
   def Compile(fileName: String): Unit = {
     for (line <- Source.fromFile(fileName).getLines()) {
       // get the first Token
+
+      var currLine : String = line
+      val filteredLine : String = currLine.filter(!"\t".contains(_))
       if (!hasDocEnd) {
         if (debugMode)
-          println("Current Line being Analyzed: " + line)
-        Scanner.start(line)
+          println("Current Line being Analyzed: " + filteredLine)
+        Scanner.start(filteredLine)
         // keep lineCount
         lineCount += 1
 

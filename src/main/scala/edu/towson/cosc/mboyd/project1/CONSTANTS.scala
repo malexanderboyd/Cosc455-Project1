@@ -28,7 +28,7 @@ object CONSTANTS {
   val EQSIGN : String = "="
   val USEB : String = "\\USE["
   val EOL : Char = '\n'
-  val EOLS : String = "\n"
+  val EOLS : String = "\\n"
   val validLexemes = new ListBuffer[String]()
 
   validLexemes += DOCB

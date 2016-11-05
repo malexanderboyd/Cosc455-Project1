@@ -63,14 +63,15 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
         {
           addLexemeChar() // addChar will handle finding valid lexemes in tokens.
           setCurrentToken(lexeme.mkString)
-          getChar()
+          if(!isLexeme(nextChar))
+            getChar()
 
         }
       else if(isValidText(nextChar.toString))
         {
           // all supported characters...   The only allowed plain text in our language is: A-Z, a-z, 0-9, commas, period, quotes, colons, question marks, underscores and forward slashes.
           while(!isEOL(nextChar) && !foundTxtToken ) {
-            if(nextChar.toString.equalsIgnoreCase(" ")) {
+            if(isSpace(nextChar)) {
               setCurrentToken(lexeme.mkString)
               foundTxtToken = true
             }
@@ -82,9 +83,16 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
         }
       else
         {
-          getChar()
+          if(isSpace(nextChar)) {
+            if(!lexeme.contains(" ") && !isEOL(nextChar)) {
+              setCurrentToken(lexeme.mkString)
+              foundTxtToken = true
+            }
+          }
         }
-      if(!lexeme.mkString.contains("\\n") && !lexeme.mkString.contains("\\t") && !lexeme.mkString.contains(""))
+
+
+      if(!lexeme.mkString.contains("\\n"))
         {
           setCurrentToken(lexeme.mkString)
           foundTxtToken = true
@@ -99,6 +107,10 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     }
   }
 
+
+  def isSpace(c : Char) : Boolean = {
+    nextChar.toString.equalsIgnoreCase(" ")
+  }
   def lookup(candidateToken: String): Boolean = {
     if (Compiler.debugMode)
       println("Candidate Token: " + candidateToken)
@@ -159,7 +171,7 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
     nextChar = tempChar
     position = tempPos
     lexeme += nextChar // only add one \
-    while(!isEOL(nextChar) && !nextChar.toString.equalsIgnoreCase("["))
+    while(!isEOL(nextChar) && !nextChar.toString.equalsIgnoreCase("]"))
     {
       getChar()
       if(!isLexeme(nextChar))
@@ -182,6 +194,7 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
         getChar()
         addChar()
       }
+
       if (isEOL(nextChar) && !nextChar.toString.equals(CONSTANTS.BRACKETE)) {
         setError()
         println("Line: " + Compiler.lineCount + " Syntax Error - Expected closing brackette ']' after '[' usage.")

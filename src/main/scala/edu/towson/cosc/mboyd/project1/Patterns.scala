@@ -28,7 +28,7 @@ object Patterns {
   // Headings
   val headingPattern = """(\#[a-zA-Z_0-9\s]+)""".r
 
-
+  val commentPattern = """(\[.+\])""".r
   val addressPattern = """(\(.+\))""".r
 
   val imagePattern = """(\!\s?\[.+\]\s?\(.+\)?\s?)""".r // not sure if using this to check if it's correct or slicing it up and compare versus previous patterns if better
@@ -38,7 +38,7 @@ object Patterns {
 
   val linkPattern = """(\[.+\]\(.+\))""".r
 
-  val listPattern = """(\+.+)""".r
+  val listPattern = """(\+.?)""".r
 
   val paragraphBeginPattern = """(\\PARB)""".r
   val paragraphEndPattern = """(\\PARE)""".r

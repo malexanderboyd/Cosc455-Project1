@@ -22,6 +22,7 @@ class SyntaxAnalyzer {
 
   def GittexBegin(): Unit = {
     // Check if current token is the document begin token
+    if(Compiler.debugMode)
     println("CURRENT TOKEN: " + Compiler.currentToken)
     if (Compiler.currentToken.equalsIgnoreCase(CONSTANTS.DOCB)) {
 
@@ -58,9 +59,10 @@ class SyntaxAnalyzer {
   }
 var numBodyPasses : Integer = 0
   def body(): Unit = {
-      variableDefine()
+
+    if(variableDefine()) {}
+    else
       innerText()
-      //paragraph()
       Compiler.Scanner.getNextToken()
       while(!Compiler.currentToken.equalsIgnoreCase("\\n"))
         {
@@ -76,6 +78,11 @@ var numBodyPasses : Integer = 0
 
   def paragraphEnd() : Unit = {
     pareEcounter += 1
+    if(pareEcounter > parabcounter)
+      {
+        println("Line " + Compiler.lineCount + " SYNTAX ERROR: Cannot have a \\pare without prematching \\parb.")
+        setError()
+      }
     if(Compiler.debugMode)
       println("VALID PARE FOUND -- ADD STACK")
   }
@@ -87,6 +94,14 @@ var numBodyPasses : Integer = 0
    }
   }
 
+  def comment() : Unit = {
+var hasAddress : Boolean = false
+    // we need to make sure that there is an address after this to begin a link.
+    val commentBuffer : String = Compiler.currentToken
+    Compiler.Scanner.getNextToken()
+    Compiler.currentToken = commentBuffer + Compiler.currentToken
+    innerText()
+  }
 
    def innerText(): Unit = {
       Compiler.currentToken match {
@@ -102,6 +117,10 @@ var numBodyPasses : Integer = 0
         case Patterns.paragraphBeginPattern(_) => paragraph()
         case Patterns.paragraphEndPattern(_) => paragraphEnd()
         case Patterns.variableDefPattern(_) => variableDefine()
+        case Patterns.commentPattern(_) => comment()
+        case "" => if(Compiler.debugMode)
+          println("FOUND VALID SPACE IN BODY, ADDTO STACK----")//add space to stack within list
+        case "\\n" => EOL()
         case _ => println("Line: " + Compiler.lineCount + " Syntax Error: Invalid Syntax: " + Compiler.currentToken)
                   setError()
       }
@@ -115,7 +134,11 @@ var numBodyPasses : Integer = 0
         case Patterns.italicsPattern(_) => italics()
         case Patterns.linkPattern(_) => link()
         case Patterns.textPattern(_) => text()
-        case _ => Compiler.Scanner.getNextToken()
+        case Patterns.listPattern(_) =>
+        case "" => if(Compiler.debugMode)
+                      println("FOUND VALID SPACE IN LIST, ADDTO STACK----")//add space to stack within list
+        case _ => println("Line: " + Compiler.lineCount + " Invalid Syntax. Cannot use " + Compiler.currentToken + " within a list.")
+                  setError()
       }
       Compiler.Scanner.getNextToken()
     }
@@ -163,10 +186,10 @@ var numBodyPasses : Integer = 0
         println("\\TITLE[ going to variableDefine() ... aka no optional variable, moving along....")
       return false
     }
-     if(Compiler.debugMode)
-        println("VALID DEFINE --- TODO ADD STACK")
     Compiler.currentToken match {
-      case Patterns.variableDefPattern(_) => true
+      case Patterns.variableDefPattern(_) => if(Compiler.debugMode)
+                                              println("VALID DEFINE --- TODO ADD STACK")
+                                              true
       case _ => false
     }
   }
