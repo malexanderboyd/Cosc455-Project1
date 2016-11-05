@@ -6,6 +6,7 @@ class SyntaxAnalyzer {
   var optDef: Boolean = false
   var parabcounter : Integer = 0
   var pareEcounter : Integer = 0 // lol pls dont have 9999 parab and parae. Terrible way to implement this to check if para end and start, but these should be equal if correct.
+  var resolvedStack = new scala.collection.mutable.Stack[String]
   // scala is c00L
   def setError() = errorFound = true
 
@@ -30,6 +31,7 @@ class SyntaxAnalyzer {
       // add here
       if (Compiler.debugMode)
         println("VALID BEGIN STATEMENT -- GittexBegin()")
+      resolvedStack.push(Compiler.currentToken)
 
 
     } else {
@@ -40,7 +42,9 @@ class SyntaxAnalyzer {
 
   def gittexEnd(): Boolean = {
     if (Compiler.currentToken.equalsIgnoreCase(CONSTANTS.DOCE)) {
-        true
+      resolvedStack.push(Compiler.currentToken)
+          true
+
     } else {
       println("Line: " + Compiler.lineCount + ": SYNTAX ERROR: Expected \\END was expected at end of input " + Compiler.currentToken + " was found.")
       setError()
@@ -55,9 +59,9 @@ class SyntaxAnalyzer {
       case Patterns.titlePattern(_) => hasTitle = true
       case _ => setError()
     }
+    resolvedStack.push(Compiler.currentToken)
     hasTitle
   }
-var numBodyPasses : Integer = 0
   def body(): Unit = {
 
     if(variableDefine()) {}
@@ -74,6 +78,8 @@ var numBodyPasses : Integer = 0
     parabcounter += 1
     if(Compiler.debugMode)
       println("VALID PARAB FOUND -- ADD STACK")
+    resolvedStack.push(Compiler.currentToken)
+
   }
 
   def paragraphEnd() : Unit = {
@@ -85,12 +91,16 @@ var numBodyPasses : Integer = 0
       }
     if(Compiler.debugMode)
       println("VALID PARE FOUND -- ADD STACK")
+    resolvedStack.push(Compiler.currentToken)
+
   }
 
  def variableUse(): Unit = {
    Compiler.currentToken match {
-     case Patterns.variableUsePattern(_) => println("We gonna be ight. -- TODO ADD TO STACK")
-     case _ => print("Shit .")
+     case Patterns.variableUsePattern(_) => if(Compiler.debugMode)
+                                            println("We gonna be ight. -- TODO ADD TO STACK")
+                                            resolvedStack.push(Compiler.currentToken)
+     case _ => print("Major Error: " + Compiler.currentToken)
    }
   }
 
@@ -120,6 +130,7 @@ var hasAddress : Boolean = false
         case Patterns.commentPattern(_) => comment()
         case "" => if(Compiler.debugMode)
           println("FOUND VALID SPACE IN BODY, ADDTO STACK----")//add space to stack within list
+          resolvedStack.push(Compiler.currentToken)
         case "\\n" => EOL()
         case _ => println("Line: " + Compiler.lineCount + " Syntax Error: Invalid Syntax: " + Compiler.currentToken)
                   setError()
@@ -134,9 +145,10 @@ var hasAddress : Boolean = false
         case Patterns.italicsPattern(_) => italics()
         case Patterns.linkPattern(_) => link()
         case Patterns.textPattern(_) => text()
-        case Patterns.listPattern(_) =>
+        case Patterns.listPattern(_) => resolvedStack.push(Compiler.currentToken)
         case "" => if(Compiler.debugMode)
                       println("FOUND VALID SPACE IN LIST, ADDTO STACK----")//add space to stack within list
+                        resolvedStack.push(Compiler.currentToken)
         case _ => println("Line: " + Compiler.lineCount + " Invalid Syntax. Cannot use " + Compiler.currentToken + " within a list.")
                   setError()
       }
@@ -147,16 +159,19 @@ var hasAddress : Boolean = false
   def text() : Unit = {
 
     if(Compiler.debugMode)
-      println("Found Text -- TODO IMPLEMENT STACK")
+    println("Found Text -- TODO IMPLEMENT STACK")
+    resolvedStack.push(Compiler.currentToken)
   }
   def lineBreak() : Unit = {
     if(Compiler.debugMode)
       println("VALID LINEBREAK --- TODO ADD STACK IMPLEMENTATION")
+    resolvedStack.push(Compiler.currentToken)
   }
 
   def address() : Unit = {
     if(Compiler.debugMode)
       println("VALID ADDRESS --- TODO ADD STACK IMPLEMENTATION")
+    resolvedStack.push(Compiler.currentToken)
   }
 
    def bold(): Unit = {
@@ -164,6 +179,7 @@ var hasAddress : Boolean = false
     // add to stack to convert to html and move on
      if (Compiler.debugMode)
     println("Valid BOLD, ---- TODO ADD STACK IMPLEMENTATION")
+     resolvedStack.push(Compiler.currentToken)
   }
 
    def italics(): Unit = {
@@ -171,6 +187,7 @@ var hasAddress : Boolean = false
     // add to stack to convert to html and move on
      if (Compiler.debugMode)
     println("Valid ITALIC, ---- TODO ADD STACK IMPLEMENTATION")
+     resolvedStack.push(Compiler.currentToken)
   }
 
    def heading(): Unit = {
@@ -178,6 +195,7 @@ var hasAddress : Boolean = false
     // add to stack to convert to html and move on
      if (Compiler.debugMode)
     println("Valid Header, ---- TODO ADD STACK IMPLEMENTATION")
+     resolvedStack.push(Compiler.currentToken)
   }
 
    def variableDefine(): Boolean = {
@@ -189,6 +207,7 @@ var hasAddress : Boolean = false
     Compiler.currentToken match {
       case Patterns.variableDefPattern(_) => if(Compiler.debugMode)
                                               println("VALID DEFINE --- TODO ADD STACK")
+                                              resolvedStack.push(Compiler.currentToken)
                                               true
       case _ => false
     }
@@ -242,11 +261,13 @@ var hasAddress : Boolean = false
    def link(): Unit = {
      if (Compiler.debugMode)
   println("Valid LINK, ---- TODO ADD STACK IMPLEMENTATION")
+     resolvedStack.push(Compiler.currentToken)
    }
 
    def image(): Unit = {
      if (Compiler.debugMode)
        println("Valid IMAGE, ---- TODO ADD STACK IMPLEMENTATION")
+     resolvedStack.push(Compiler.currentToken)
    }
 
    def newline(): Unit = {

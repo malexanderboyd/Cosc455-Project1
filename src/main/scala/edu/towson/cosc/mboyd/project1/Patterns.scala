@@ -6,6 +6,8 @@ package edu.towson.cosc.mboyd.project1
 object Patterns {
   // Regex to find token patterns
 
+  val beginPattern = """(\\BEGIN)""".r
+  val endPattern = """(\\END)""".r
   val textPattern = """([A-Za-z0-9\,\.\"\:\?_\/]+)""".r
 
   // variable use

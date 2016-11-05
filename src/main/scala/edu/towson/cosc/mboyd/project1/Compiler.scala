@@ -2,7 +2,10 @@ package edu.towson.cosc.mboyd.project1
 
 
 import scala.io.Source
-import scala.collection.mutable.Queue
+
+import java.awt.Desktop
+import java.io.{File, IOException}
+
 object Compiler {
 
   var currentToken: String = ""
@@ -10,7 +13,6 @@ object Compiler {
   val Scanner = new LexicalAnalyzer
   val Parser = new SyntaxAnalyzer
   val Semantics = new SemanticAnalyzer
-  var fileContents: String = ""
   var debugMode: Boolean = true
   var numPasses : Integer = 0
   //basic <gittex>
@@ -19,7 +21,7 @@ object Compiler {
   var hasTitle: Boolean = false
   var hasBody: Boolean = false
   var hasDocEnd: Boolean = false
-
+  var fileName : String = ""
   def main(args: Array[String]) = {
     // make sure input follows usage rules
     checkInput(args)
@@ -97,7 +99,6 @@ object Compiler {
       }
     }// end of line input loop
 
-
       if (Parser.parabcounter != Parser.pareEcounter) {
         if (Parser.parabcounter > Parser.pareEcounter)
           println("SYNTAX ERROR: Paragraph does not have closing paragraph (\\PARE)")
@@ -114,10 +115,30 @@ object Compiler {
       }
     if (debugMode)
       println("===== Has Gittex End:  " + hasDocEnd + " ====")
-    checkForSyntaxErrors()
-    Semantics.convert()
 
+    checkForSyntaxErrors()
+    openHTMLFileInBrowser(Semantics.convert(Parser.resolvedStack))
   }
+
+
+  /* * Hack Scala/Java function to take a String filename and open in default web browswer. */
+  def openHTMLFileInBrowser(htmlFileStr : String) = {
+    val file : File = new File(htmlFileStr.trim)
+    println(file.getAbsolutePath)
+    if (!file.exists())
+      sys.error("File " + htmlFileStr + " does not exist.")
+
+    try {
+      Desktop.getDesktop.browse(file.toURI)
+    }
+    catch {
+      case ioe: IOException => sys.error("Failed to open file:  " + htmlFileStr)
+      case e: Exception => sys.error("He's dead, Jim!")
+    }
+  }
+
+
+
 
   def checkForSyntaxErrors(): Unit = {
     if (Parser.getError)
@@ -125,6 +146,8 @@ object Compiler {
   }
 
   def checkInput(inputFile: Array[String]): Unit = {
+
+    fileName = inputFile(0).filter(!".mkd".contains(_))
     if (inputFile.length != 1) {
       println("Usage Error: Wrong number of input arguments.")
       System.exit(0)
