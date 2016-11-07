@@ -3,6 +3,7 @@ package edu.towson.cosc.mboyd.project1
 import java.io.FileWriter
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 /**
   * Created by alex on 10/11/16.
@@ -14,7 +15,9 @@ class SemanticAnalyzer {
   val definedVariables = new mutable.HashMap[String,String]()
   var currentLexeme: String = ""
   var fileName : String = ""
-
+  var scopeStorage = new mutable.HashMap[String,String]()
+  var scopeNames = new ArrayBuffer[String](100)
+  var listItem : String = "z"
   def convert(parseStack: mutable.Stack[String]): String = {
     fileName = Compiler.fileName
     inputStack = parseStack
@@ -34,14 +37,26 @@ class SemanticAnalyzer {
         case Patterns.headingPattern(_) => generateHeading()
         case Patterns.boldPattern(_) => generateBold()
         case Patterns.italicsPattern(_) => generateItalics()
-        case Patterns.listPattern(_) => generateList() // need to implement
+        case Patterns.listPattern(_) => generateList()
+                                        while(!listItem.equalsIgnoreCase("") && !inputStack.isEmpty && !listItem.equalsIgnoreCase("+"))
+                                        {
+                                         listItem = inputStack.pop
+                                          listItem match {
+                                            case "+" => generateList()
+                                            case "" => generateSpace()
+                                            case _ => ResolvedStack.push(listItem)
+                                          }
+
+                                        }// need to implement this better
+                                        inputStack.push("<li>")
         case Patterns.imagePattern(_) => generateImage()
         case Patterns.linkPattern(_) => generateLink()
         case Patterns.newLinePattern(_) => generateLineBreak()
         case Patterns.textPattern(_) => addText()
         case Patterns.paragraphBeginPattern(_) => generateParagraphBegin()
         case Patterns.paragraphEndPattern(_) => generateParagraphEnd()
-        case "" => generateSpace()
+        case "<li>" => ResolvedStack.push("</li>")
+        case "" =>
         // end
         case Patterns.endPattern(_) => generateEnd()
         case _ => println("Unfound match somehow got here? oh noes: " + currentLexeme)
@@ -51,7 +66,20 @@ class SemanticAnalyzer {
     output()
     fileName
   }
+def resetVars(): Unit = {
+  var i : Int = 0
+  definedVariables.clear()
+    while(i < scopeNames.length)
+      {
+        definedVariables += (scopeNames(i) -> scopeStorage(scopeNames(i)))
+        i += 1
+      }
+}
 
+ def storeVariables(vName : String, valValue : String) : Unit = {
+   scopeStorage += (vName -> valValue)
+   scopeNames += vName
+  }
 def generateSpace(): Unit = {
   ResolvedStack.push(" ")
 }
@@ -60,12 +88,32 @@ def generateSpace(): Unit = {
     while (!ResolvedStack.isEmpty) {
       currentLexeme = ResolvedStack.pop()
       currentLexeme match {
+        case Patterns.variableDefPattern(_) => findRunTimeValues()
         case Patterns.variableUsePattern(_) => fileWriter.append(retrieveValue())
         case "" => fileWriter.append(" ")
+        case "</p>" => fileWriter.append(currentLexeme)
+                       resetVars()
+        case "\\n" => generateLineBreak()
         case _ => fileWriter.append(currentLexeme)
       }
     }
     fileWriter.close()
+  }
+
+  def findRunTimeValues() : Unit = {
+    var defToken : String = currentLexeme
+    defToken = defToken.filter(!" ".contains(_))
+    val valName : String = defToken.substring(defToken.indexOf("[") + 1, defToken.indexOf("="))
+    val valValue : String =  defToken.substring(defToken.indexOf("=") + 1, defToken.indexOf("]"))
+    if(definedVariables.contains(valName))
+    {
+      definedVariables.put(valName, valValue)
+    }
+    else {
+      definedVariables += (valName -> valValue)
+      storeVariables(valName, valValue)
+      scopeNames += valName
+    }
   }
 
   def generateEnd() : Unit ={
@@ -107,7 +155,7 @@ def generateLink() : Unit = {
       }
 
   def generateList() = {
-    ResolvedStack.push("</li>")
+    ResolvedStack.push("<li>")
   }
 
 
@@ -138,14 +186,15 @@ def generateItalics() : Unit = {
     val fileWriter = new FileWriter(fileName + ".html", true)
     var useToken : String = currentLexeme
     val varName = useToken.substring(useToken.indexOf("[") + 1, useToken.indexOf("]"))
-    if(definedVariables(varName) != null)
+    if(definedVariables.contains(varName))
       {
         definedVariables(varName)
       }
     else
       {
         println("Semantic Error: Attempting to use undefined variable: \'" + varName + "\'.")
-        null
+        System.exit(-1)
+        ""
       }
   }
 
@@ -155,8 +204,10 @@ def generateItalics() : Unit = {
     defToken = defToken.filter(!" ".contains(_))
     val valName : String = defToken.substring(defToken.indexOf("[") + 1, defToken.indexOf("="))
     val valValue : String =  defToken.substring(defToken.indexOf("=") + 1, defToken.indexOf("]"))
-    definedVariables += (valName -> valValue)
-
+      definedVariables += (valName -> valValue)
+      storeVariables(valName, valValue)
+      scopeNames += valName
+    generateDef()
   }
 
   def generateBegin(): Unit = {

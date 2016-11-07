@@ -13,3 +13,6 @@ project/target/resolution-cache/default/cosc455-project1-build/scala_2.10/sbt_0.
 project/target/resolution-cache/reports/default-cosc455-project1-build-pom.xml
 *.class
 project/target/resolution-cache/default/cosc455-project1-build/scala_2.10/sbt_0.13/0.1-SNAPSHOT/resolved.xml.properties
+*.jar
+out/artifacts/cosc455_project1_jar/input.html
+*.xml

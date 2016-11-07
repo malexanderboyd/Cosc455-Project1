@@ -2,6 +2,8 @@ package edu.towson.cosc.mboyd.project1
 
 /**
   * Created by Boyd on 10/31/2016.
+  *
+  * Thank you based https://regex101.com/
   */
 object Patterns {
   // Regex to find token patterns
@@ -42,8 +44,8 @@ object Patterns {
 
   val listPattern = """(\+.?)""".r
 
-  val paragraphBeginPattern = """(\\[P,p][A,a][R,r][B,b])""".r
-  val paragraphEndPattern = """(\\[P,p][A,a][R,r][E,e])""".r
+  val paragraphBeginPattern = """(\\[P,p][A,a][R,r][A,a][B,b])""".r
+  val paragraphEndPattern = """(\\[P,p][A,a][R,r][A,a][E,e])""".r
   //    //case '+' => getList()
   //case '\\' => identifySlash()
   //case '(' => getAddress()

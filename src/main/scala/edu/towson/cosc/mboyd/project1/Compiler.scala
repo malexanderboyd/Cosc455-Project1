@@ -13,7 +13,7 @@ object Compiler {
   val Scanner = new LexicalAnalyzer
   val Parser = new SyntaxAnalyzer
   val Semantics = new SemanticAnalyzer
-  var debugMode: Boolean = true
+  var debugMode: Boolean = false
   var numPasses : Integer = 0
   //basic <gittex>
   var hasDocBegin: Boolean = false
@@ -37,9 +37,16 @@ object Compiler {
   }
 
   def Compile(fileName: String): Unit = {
-    for (line <- Source.fromFile(fileName).getLines()) {
+    var file = fileName
+    file = "./" + file
+    for (line <- Source.fromFile(file).getLines()) {
       // get the first Token
-
+      if(line.length >0 && hasDocEnd)
+        {
+          lineCount += 1
+          println("Line: " + lineCount + " Syntax Error: File has \\END declared but more input afterwards." + line)
+          System.exit(-1)
+        }
       var currLine : String = line
       val filteredLine : String = currLine.filter(!"\t".contains(_))
       if (!hasDocEnd) {
@@ -123,7 +130,7 @@ object Compiler {
 
   /* * Hack Scala/Java function to take a String filename and open in default web browswer. */
   def openHTMLFileInBrowser(htmlFileStr : String) = {
-    val file : File = new File(htmlFileStr + ".html")
+    val file : File = new File(fileName.dropRight(0) + ".html")
     println(file.getAbsolutePath)
     if (!file.exists())
       sys.error("File " + htmlFileStr + " does not exist.")

@@ -7,6 +7,7 @@ class SyntaxAnalyzer {
   var parabcounter : Integer = 0
   var pareEcounter : Integer = 0 // lol pls dont have 9999 parab and parae. Terrible way to implement this to check if para end and start, but these should be equal if correct.
   var resolvedStack = new scala.collection.mutable.Stack[String]
+  var ListOver : Boolean = false
   // scala is c00L
   def setError() = errorFound = true
 
@@ -114,6 +115,7 @@ var hasAddress : Boolean = false
   }
 
    def innerText(): Unit = {
+     Compiler.currentToken = Compiler.currentToken.filter(!" ".contains(_))
       Compiler.currentToken match {
         case Patterns.variableUsePattern(_) => variableUse()
         case Patterns.headingPattern(_) => heading()
@@ -132,27 +134,29 @@ var hasAddress : Boolean = false
           println("FOUND VALID SPACE IN BODY, ADDTO STACK----")//add space to stack within list
           resolvedStack.push(Compiler.currentToken)
         case "\\n" => EOL()
-        case _ => println("Line: " + Compiler.lineCount + " Syntax Error: Invalid Syntax: " + Compiler.currentToken)
+        case Patterns.endPattern(_) => resolvedStack.push("\\end")
+        case _ => println("Line: " + Compiler.lineCount + " Lexical Error: Unknown Lexical: " + Compiler.currentToken)
                   setError()
       }
   }
 
   def innerItem() : Unit = {
-    while(!Compiler.currentToken.equalsIgnoreCase("\\n")) {
+    while(!Compiler.currentToken.equalsIgnoreCase("\\n") && !ListOver) {
       Compiler.currentToken match {
         case Patterns.variableUsePattern(_) => variableUse()
         case Patterns.boldPattern(_) => bold()
         case Patterns.italicsPattern(_) => italics()
         case Patterns.linkPattern(_) => link()
         case Patterns.textPattern(_) => text()
-        case Patterns.listPattern(_) => resolvedStack.push(Compiler.currentToken)
+        case Patterns.listPattern(_) => ListOver = true
         case "" => if(Compiler.debugMode)
                       println("FOUND VALID SPACE IN LIST, ADDTO STACK----")//add space to stack within list
                         resolvedStack.push(Compiler.currentToken)
-        case _ => println("Line: " + Compiler.lineCount + " Invalid Syntax. Cannot use " + Compiler.currentToken + " within a list.")
-                  setError()
+        case _ => ListOver = true
+
       }
-      Compiler.Scanner.getNextToken()
+      if(!ListOver)
+        Compiler.Scanner.getNextToken()
     }
   }
 
@@ -251,10 +255,11 @@ var hasAddress : Boolean = false
    def listItem(): Unit = {
      innerItem()
      Compiler.Scanner.getNextToken()
-     while(!Compiler.currentToken.equalsIgnoreCase("\\n"))
+     while(!Compiler.currentToken.equalsIgnoreCase("\\n") && !ListOver)
      {
        listItem()
      }
+     resolvedStack.push("+")
    }
 
 

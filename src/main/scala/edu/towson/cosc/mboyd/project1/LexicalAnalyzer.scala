@@ -97,6 +97,8 @@ class LexicalAnalyzer extends LexicalAnalyzerTraits {
           setCurrentToken(lexeme.mkString)
           foundTxtToken = true
         }
+
+
     }
   }
 
